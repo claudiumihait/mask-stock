@@ -1,18 +1,32 @@
-import { config } from "dotenv";
-import express, { json, urlencoded } from "express";
-import cors from "cors";
-
+const express = require('express');
 const app = express();
+const cors = require('cors');
+const { default: mongoose } = require('mongoose');
+require('dotenv').config()
 
-app.use(cors());
+// Mongo DB Connections
+mongoose.connect(process.env.MONGO_DB_URL, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+}).then(response=>{
+    console.log('MongoDB Connection Succeeded.')
+}).catch(error=>{
+    console.log('Error in DB connection: ' + error)
+});
 
-//  Get all data from .env
-config();
-const port = process.env.PORT;
 
-//parsing JSON requests to data -> req.body
-app.use(json());
-app.use(urlencoded({ extended: false }));
+// Middleware Connections
+app.use(cors())
+app.use(express.json())
 
-//setting server port
-app.listen(port, _ => console.log(`http://127.0.0.1:${port}`));
+
+// Routes
+app.get("/", (req,res)=>{
+    res.json({message: "GET ROUTE for /"})
+})
+
+// Connection
+const PORT = process.env.PORT
+app.listen(PORT, ()=>{
+    console.log('App running in port: '+PORT)
+})
