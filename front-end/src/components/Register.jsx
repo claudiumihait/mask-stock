@@ -113,7 +113,7 @@ const Register = () => {
       >
         <Card.Body>
           <Card.Title style={{ textAlign: "center", marginBottom: "2rem" }}>
-            SignUp Form
+            Registration Form
           </Card.Title>
           <Form>
             <Form.Group className="mb-3" controlId="formBasicText">

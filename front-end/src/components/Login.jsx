@@ -78,7 +78,7 @@ const Login = () => {
 
             <div className="d-flex justify-content-center">
               <Button onClick={(event) => { event.preventDefault(); registerClick(formData); }} variant="primary" type="submit">
-                Register
+                Log In
               </Button>
             </div>
           </Form>
