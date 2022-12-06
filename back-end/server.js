@@ -35,12 +35,41 @@ app.use("/api/register", registerRouter);
 const registerRoute = require("./routes/register");
 app.use("/api/register", registerRoute);
 const loginRoute = require("./routes/login");
+const productsModel = require("./models/products.model.js");
 app.use("/login", loginRoute);
 
+
 app.get("/", async (req, res) => {
-  let hospitalNames = await tools.getHospitalNames(process.env.ATLAS_URI);
-  res.send(hospitalNames);
+    let hospitalNames = await tools.getHospitalNames(process.env.ATLAS_URI);
+    let productsName = await tools.getProducts()
+    res.send(hospitalNames,productsName);
 });
+
+
+// Routes
+app.get("/", (req,res)=>{
+    res.json({message: "GET ROUTE for /"})
+})
+app.get("/hospitals", async(req,res)=>{
+    const response = await fetch("https://api.billingo.hu/v3/partners",{
+        headers: {
+            'X-API-KEY': '2a808996-6f31-11ed-8f89-06ac9760f844',
+            'Content-Type': 'application/json'
+        }
+    })
+    const json = await response.json()
+    if(response.ok){
+        Hospitals.insertMany(json.data)
+        .then(function(){
+            console.log("Data inserted")  // Success
+        }).catch(function(error){
+            console.log("error: ",error)      // Failure
+        });
+    }
+    if(!response.ok){
+        res.status(400).json({message:"something went wrong with get data"})
+    }
+})
 
 //setting server port
 app.listen(port, (_) => console.log(`http://127.0.0.1:${port}`));
