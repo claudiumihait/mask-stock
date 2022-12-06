@@ -1,84 +1,53 @@
-import React, { useState, useRef, useCallback } from "react";
-import Col from "react-bootstrap/Col";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
-import Card from "react-bootstrap/Card";
-import { useNavigate } from "react-router-dom";
-
-const checkCredentials = (field, credential, handleMessage) => {
-  fetch("http://localhost:9000/api/register", {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ [field]: credential }),
-  })
-    .then((res) => res.json())
-    .then((message) => {
-      handleMessage(message.error === "" ? `Valid ${field}.` : message.error);
-    })
-    .catch((e) => console.log(e));
-};
+import React, { useState, useRef, useCallback } from 'react';
+import Col from 'react-bootstrap/Col';
+import Form from 'react-bootstrap/Form';
+import Button from 'react-bootstrap/Button';
+import Card from 'react-bootstrap/Card';
+import { useNavigate } from 'react-router-dom';
+import registerLogo from '../../src/images/register_logo.png';
+import succesfulLogo from '../../src/images/succesful.gif';
 
 const Register = () => {
-  const [formData, setFormData] = useState({
-    password: "",
-    email: "",
-    username: "",
-  });
-
-  const [usernameErrMsg, setUsernameErrMsg] = useState(
-    "Choose a complex password"
-  );
-  const [emailErrMsg, setEmailErrMsg] = useState(
-    "We'll never share your email with anyone else."
-  );
-  const [pwdErrMsg, setPwdErrMsg] = useState(
-    "Password must be at least 8 characters long."
-  );
-
+  const [formData, setFormData] = useState({ password: "", email: "", username: "" });
+  const [messages, setMessagesState] = useState({ password: "Choose a complex password.", email: " We'll never share your email with anyone else.", username: "Prefered username." });
   const [finalStatus, setFinalStatus] = useState(false);
   let timerIdRef = useRef();
 
   const navigate = useNavigate();
 
-  const usernameChange = async (name) => {
-    setFormData({
-      username: name,
-      email: formData.email,
-      password: formData.password,
-    });
-    checkCredentials("username", name, setUsernameErrMsg);
+  const usernameChange = (name) => {
+    setFormData({ username: name, email: formData.email, password: formData.password });
+    fetch("http://localhost:9000/user/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ username: name }),
+    })
+      .then((response) => response.json())
+      .then((data) => setMessagesState({ password: messages.password, email: messages.email, username: data[0].message }));
   };
-
   const emailChange = (email) => {
-    setFormData({
-      username: formData.username,
-      email: email,
-      password: formData.password,
-    });
-    checkCredentials("email", email, setEmailErrMsg);
+    setFormData({ username: formData.username, email: email, password: formData.password });
+    fetch("http://localhost:9000/user/register", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email: email }),
+    })
+      .then((response) => response.json())
+      .then((data) => setMessagesState({ password: messages.password, email: data[0].message, username: messages.username }));
   };
-
   const passwordChange = (password) => {
-    if (password.length >= 8) {
-      setFormData({
-        username: formData.username,
-        email: formData.email,
-        password: password,
-      });
-      setPwdErrMsg("Valid password.");
-    } else setPwdErrMsg("Password must be at least 8 characters long.");
+    password.length < 7 ? setMessagesState({ password: "Password too short.", email: messages.email, username: messages.username }) : setMessagesState({ password: "Valid password.", email: messages.email, username: messages.username });
+    setFormData({ username: formData.username, email: formData.email, password: password });
   };
 
   const registerClick = (formData) => {
-    if (
-      pwdErrMsg === "Valid password." &&
-      emailErrMsg === "Valid email." &&
-      usernameErrMsg === "Valid username."
-    ) {
+    if (messages.password === "Valid password." && messages.email === "Valid email." && messages.username === "Valid username.") {
       clearTimeout(timerIdRef.current);
-      fetch("http://localhost:9000/register", {
+      fetch("http://localhost:9000/user/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -86,118 +55,55 @@ const Register = () => {
         body: JSON.stringify(formData),
       })
         .then((response) => response.json())
-        .then((data) => {
-          setFinalStatus(data[0].status);
-          timerIdRef.current = setTimeout(() => navigate("/"), 2000);
-        });
+        .then((data) => { setFinalStatus(data[0].status); timerIdRef.current = setTimeout(() => navigate("/"), 2000); });
     }
-  };
-
+  }
+  
+  
   return (
-    <Col
-      style={{ padding: "0" }}
-      lg={{ span: 4, offset: 4 }}
-      md={{ span: 6, offset: 3 }}
-      xs={{ span: 8, offset: 2 }}
-    >
-      <Card
-        bg="dark"
-        text="white"
-        style={{
-          marginTop: "2rem",
-          marginBottom: "2rem",
-          border: "0",
-          paddingTop: "1rem",
-          paddingBottom: "1rem",
-        }}
-        className="d-flex flex-column"
-      >
-        <Card.Body>
-          <Card.Title style={{ textAlign: "center", marginBottom: "2rem" }}>
-            Registration Form
-          </Card.Title>
-          <Form>
-            <Form.Group className="mb-3" controlId="formBasicText">
-              <Form.Label>Username</Form.Label>
-              <Form.Control
-                onChange={(event) => usernameChange(event.target.value)}
-                type="text"
-                placeholder="Enter username"
-              />
-              <Form.Text
-                style={{
-                  color:
-                    formData.username.length > 0
-                      ? usernameErrMsg !== "Valid username."
-                        ? "red"
-                        : "green"
-                      : "gray",
-                }}
-              >
-                {usernameErrMsg}
-              </Form.Text>
-            </Form.Group>
+    <Col style={{ padding: "0" }} lg={{ span: 4, offset: 4 }} md={{ span: 6, offset: 3 }} xs={{ span: 8, offset: 2 }}>
+      <Card bg="dark" text="white" style={{ marginTop: "2rem", marginBottom: "2rem", border: "0", paddingTop: "1rem", paddingBottom: "1rem" }} className="d-flex flex-column">
+        {finalStatus && <Card.Img src={succesfulLogo} style={{ width: "50%", marginLeft: "25%" }} />}
+        {!finalStatus &&
+          <>
+            <Card.Img variant="top" src={registerLogo} style={{ width: "50%", marginLeft: "25%" }} />
+            <Card.Body >
+              <Card.Title style={{ textAlign: "center", marginBottom: "2rem" }}>SignUp Form</Card.Title>
+              <Form>
+                <Form.Group className="mb-3" controlId="formBasicText">
+                  <Form.Label>Username</Form.Label>
+                  <Form.Control onChange={(event) => usernameChange(event.target.value)} type="text" placeholder="Enter username" />
+                  <Form.Text style={{ color: (formData.username.length > 0) ? (messages.username !== "Valid username." ? "red" : "green") : ("gray") }}>
+                    {messages.username}
+                  </Form.Text>
+                </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Email address</Form.Label>
-              <Form.Control
-                onChange={(event) => emailChange(event.target.value)}
-                type="email"
-                placeholder="Enter email"
-              />
-              <Form.Text
-                style={{
-                  color:
-                    formData.email.length > 0
-                      ? emailErrMsg !== "Valid email."
-                        ? "red"
-                        : "green"
-                      : "gray",
-                }}
-              >
-                {emailErrMsg}
-              </Form.Text>
-            </Form.Group>
+                <Form.Group className="mb-3" controlId="formBasicEmail">
+                  <Form.Label>Email address</Form.Label>
+                  <Form.Control onChange={(event) => emailChange(event.target.value)} type="email" placeholder="Enter email" />
+                  <Form.Text style={{ color: (formData.email.length > 0) ? (messages.email !== "Valid email." ? "red" : "green") : ("gray") }}>
+                    {messages.email}
+                  </Form.Text>
+                </Form.Group>
 
-            <Form.Group className="mb-3" controlId="formBasicPassword">
-              <Form.Label>Password</Form.Label>
-              <Form.Control
-                onChange={(event) => passwordChange(event.target.value)}
-                type="password"
-                placeholder="Password"
-              />
-              <Form.Text
-                style={{
-                  color:
-                    formData.password.length > 0
-                      ? pwdErrMsg !== "Valid password."
-                        ? "red"
-                        : "green"
-                      : "gray",
-                }}
-              >
-                {pwdErrMsg}
-              </Form.Text>
-            </Form.Group>
+                <Form.Group className="mb-3" controlId="formBasicPassword">
+                  <Form.Label>Password</Form.Label>
+                  <Form.Control onChange={(event) => passwordChange(event.target.value)} type="password" placeholder="Password" />
+                  <Form.Text style={{ color: (formData.password.length > 0) ? (messages.password !== "Valid password." ? "red" : "green") : ("gray") }}>
+                    {messages.password}
+                  </Form.Text>
+                </Form.Group>
 
-            <div className="d-flex justify-content-center">
-              <Button
-                onClick={(event) => {
-                  event.preventDefault();
-                  registerClick(formData);
-                }}
-                disabled="true"
-                variant="primary"
-                type="submit"
-              >
-                Register
-              </Button>
-            </div>
-          </Form>
-        </Card.Body>
+                <div className="d-flex justify-content-center">
+                  <Button onClick={(event) => { event.preventDefault(); registerClick(formData); }} variant="primary" type="submit">
+                    Register
+                  </Button>
+                </div>
+              </Form>
+            </Card.Body></>}
       </Card>
     </Col>
-  );
-};
+  )
+}
 
-export default Register;
+export default Register
