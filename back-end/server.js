@@ -35,11 +35,14 @@ app.use(express.urlencoded({ extended: false }));
 const registerRoute = require("./routes/register");
 app.use("/register", registerRoute);
 const loginRoute = require("./routes/login");
+const productsModel = require("./models/products.model.js");
 app.use("/login", loginRoute);
+
 
 app.get("/", async (req, res) => {
     let hospitalNames = await tools.getHospitalNames(process.env.ATLAS_URI);
-    res.send(hospitalNames);
+    let productsName = await tools.getProducts()
+    res.send(hospitalNames,productsName);
 });
 
 
