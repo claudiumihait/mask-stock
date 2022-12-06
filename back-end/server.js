@@ -3,6 +3,8 @@ const config = require("dotenv").config;
 const cors = require("cors");
 const morgan = require("morgan");
 const app = express();
+const mongoose = require("mongoose");
+const Products = require("./models/products.model");
 //get all data from .env
 config();
 const port = process.env.PORT;
@@ -39,17 +41,22 @@ const productsModel = require("./models/products.model.js");
 app.use("/login", loginRoute);
 
 
-app.get("/", async (req, res) => {
-    let hospitalNames = await tools.getHospitalNames(process.env.ATLAS_URI);
-    let productsName = await tools.getProducts()
-    res.send(hospitalNames,productsName);
-});
-
 
 // Routes
 app.get("/", (req,res)=>{
     res.json({message: "GET ROUTE for /"})
 })
+
+app.post("/order", async(req,res)=>{
+    const {hospital,product,quantity} = req.body
+    const updateQty = await Products.findOneAndUpdate({name:product},{$inc: { qty: -parseInt(quantity) }})
+    res.json({message:"order placed successfuly"})
+})
+app.get("/stocks", async (req,res)=>{
+    const products =  await Products.find({}, {_id:0,name:1,qty:1})
+    res.json(products)
+})
+
 app.get("/hospitals", async(req,res)=>{
     const response = await fetch("https://api.billingo.hu/v3/partners",{
         headers: {
