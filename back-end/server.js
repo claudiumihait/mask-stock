@@ -2,50 +2,67 @@ const express = require("express");
 const config = require("dotenv").config;
 const cors = require("cors");
 const morgan = require("morgan");
+
 const app = express();
 const mongoose = require("mongoose");
 const Products = require("./models/products.model");
+const port = process.env.PORT;
+const passport = require("passport");
+const session = require("express-session");
+const cookieParser = require("cookie-parser");
+require("./passportSetup");
+
+
+const app = express();
+
+app.use(cors());
+app.use(morgan("dev"));
+
+app.use((err, req, res, next) => {
+    //res.status(err.status || 500);
+    res.send({
+        error: {
+            status: err.status || 500,
+            message: err.message,
+        },
+    });
+});
+
+// app.use(session({
+//     secret: process.env.SECRET,
+//     resave: true,
+//     saveUninitialized: true,
+// }));
+// app.use(passport.session());
+// require("./passportSetup")(passport);
+// app.use(cookieParser);
+app.use(passport.initialize());
+
 //get all data from .env
 config();
-const port = process.env.PORT;
+const port = process.env.PORT || 9000;
 
 //connect mask-stock database
 const tools = require("./tools.js");
 tools.connectToDb(process.env.ATLAS_URI);
 
+//parsing JSON requests to data -> req.body
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-app.use(cors());
-app.use(morgan("dev"));
 
-app.use((err, req, res, next) => {
-  //res.status(err.status || 500);
-  res.send({
-    error: {
-      status: err.status || 500,
-      message: err.message,
-    },
-  });
-});
-
-const registerRouter = require("./routes/register");
-app.use("/api/register", registerRouter);
-
-//parsing JSON requests to data -> req.body
+const productsModel = require("./models/products.model.js");
 
 //using all routes
-const registerRoute = require("./routes/register");
-app.use("/api/register", registerRoute);
-const loginRoute = require("./routes/login");
-const productsModel = require("./models/products.model.js");
-app.use("/login", loginRoute);
-
+const userRoute = require("./routes/user");
+app.use("/user", userRoute);
 
 
 // Routes
-app.get("/", (req,res)=>{
-    res.json({message: "GET ROUTE for /"})
-})
+app.get("/", async (req, res) => {
+    let hospitalNames = await tools.getHospitalNames(process.env.ATLAS_URI);
+    let productsName = await tools.getProducts()
+    res.send(hospitalNames,productsName);
+});
 
 app.post("/order", async(req,res)=>{
     const {hospital,product,quantity} = req.body

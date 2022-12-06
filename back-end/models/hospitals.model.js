@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const hospitalSchema = new mongoose.Schema({
   id: { type: Number },
-  users:{ type: Array },
+  users:{ type: Array , default:[]},
   name: { type: String },
   address: {
     country_code: { type: String },
