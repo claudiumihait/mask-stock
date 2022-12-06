@@ -41,6 +41,7 @@ const hospitalSchema = new mongoose.Schema({
       address: { type: String },
     },
   },
+  users:{ type: Array },
   internal_comment: { type: String },
   partner_show_type: { type: String },
 });

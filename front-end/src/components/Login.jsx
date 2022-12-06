@@ -4,11 +4,11 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Col from 'react-bootstrap/Col';
 import incorrectLogo from '../../src/images/wrong_creditentials.gif';
-import succesfulLogo from '../../src/images/succesful_login.gif';
+import succesfulLogo from '../../src/images/succesful.gif';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
-  const [loginDetails, setLoginDetails] = useState({ password: "", username: "" });
+  const [loginDetails, setLoginDetails] = useState({ password: "", email: "" });
   const [finalStatus, setFinalStatus] = useState(false);
   const [errorMsg, setErrorMsg] = useState(false);
   let timerIdRef = useRef();
@@ -17,10 +17,10 @@ const Login = () => {
   const handleGoHome = useCallback(() => navigate('/', { replace: true }), [navigate]);
 
   const setPassword = (pass) => {
-    setLoginDetails({ password: pass, username: loginDetails.username });
+    setLoginDetails({ password: pass, email: loginDetails.email });
   };
-  const setUsername = (name) => {
-    setLoginDetails({ password: loginDetails.password, username: name });
+  const setEmail = (mail) => {
+    setLoginDetails({ password: loginDetails.password, email: mail });
   };
 
   const registerClick = (loginDetails) => {
@@ -37,7 +37,7 @@ const Login = () => {
         if (status) {
           setFinalStatus(status);
           timerIdRef.current = setTimeout(() => {
-            props.setName(loginDetails.username);
+            props.setName(data[0].status);
             handleGoHome();
           }, 3000);
         } else {
@@ -55,16 +55,16 @@ const Login = () => {
         {!finalStatus &&
           <>
             <div>
-              {errorMsg && <p style={{ color: "red" }}>Wrong username or password!</p>}
+              {errorMsg && <p style={{ color: "red" }}>Wrong email or password!</p>}
             </div>
         <Card.Body >
           <Card.Title style={{ textAlign: "center", marginBottom: "2rem" }}>Login Form</Card.Title>
           <Form>
             <Form.Group className="mb-3" controlId="formBasicText">
-              <Form.Label>Username</Form.Label>
-              <Form.Control onChange={(event) => setUsername(event.target.value)} type="text" placeholder="Enter username" />
+              <Form.Label>Email</Form.Label>
+                <Form.Control onChange={(event) => setEmail(event.target.value)} type="text" placeholder="Enter email" />
               <Form.Text className="text-muted">
-                Tell us your username
+                Tell us your email
               </Form.Text>
             </Form.Group>
 
