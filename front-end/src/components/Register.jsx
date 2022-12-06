@@ -11,11 +11,11 @@ const checkCredentials = (field, credential, handleMessage) => {
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ [`${field}`]: credential }),
+    body: JSON.stringify({ [field]: credential }),
   })
     .then((res) => res.json())
     .then((message) => {
-      handleMessage(message.error);
+      handleMessage(message.error === "" ? `Valid ${field}.` : message.error);
     })
     .catch((e) => console.log(e));
 };
@@ -27,25 +27,22 @@ const Register = () => {
     username: "",
   });
 
-  const [usernameErrMsg, setUsernameErrMsg] = useState("");
-  const [emailErrMsg, setEmailErrMsg] = useState("");
-  const [pwdErrMsg, setPwdErrMsg] = useState("");
-  // const [messages, setMessagesState] = useState({
-  //   password: "Choose a complex password.",
-  //   email: " We'll never share your email with anyone else.",
-  //   username: "Prefered username.",
-  // });
+  const [usernameErrMsg, setUsernameErrMsg] = useState(
+    "Choose a complex password"
+  );
+  const [emailErrMsg, setEmailErrMsg] = useState(
+    "We'll never share your email with anyone else."
+  );
+  const [pwdErrMsg, setPwdErrMsg] = useState(
+    "Password must be at least 8 characters long."
+  );
+
   const [finalStatus, setFinalStatus] = useState(false);
   let timerIdRef = useRef();
 
   const navigate = useNavigate();
-  const handleGoHome = useCallback(
-    () => navigate("/", { replace: true }),
-    [navigate]
-  );
 
   const usernameChange = async (name) => {
-    //console.log(name);
     setFormData({
       username: name,
       email: formData.email,
@@ -62,19 +59,23 @@ const Register = () => {
     });
     checkCredentials("email", email, setEmailErrMsg);
   };
+
   const passwordChange = (password) => {
-    setFormData({
-      username: formData.username,
-      email: formData.email,
-      password: password,
-    });
+    if (password.length >= 8) {
+      setFormData({
+        username: formData.username,
+        email: formData.email,
+        password: password,
+      });
+      setPwdErrMsg("Valid password.");
+    } else setPwdErrMsg("Password must be at least 8 characters long.");
   };
 
   const registerClick = (formData) => {
     if (
-      messages.password === "Valid password." &&
-      messages.email === "Valid email." &&
-      messages.username === "Valid username."
+      pwdErrMsg === "Valid password." &&
+      emailErrMsg === "Valid email." &&
+      usernameErrMsg === "Valid username."
     ) {
       clearTimeout(timerIdRef.current);
       fetch("http://localhost:9000/register", {
@@ -87,7 +88,7 @@ const Register = () => {
         .then((response) => response.json())
         .then((data) => {
           setFinalStatus(data[0].status);
-          timerIdRef.current = setTimeout(() => handleGoHome(), 2000);
+          timerIdRef.current = setTimeout(() => navigate("/"), 2000);
         });
     }
   };
@@ -185,6 +186,7 @@ const Register = () => {
                   event.preventDefault();
                   registerClick(formData);
                 }}
+                disabled="true"
                 variant="primary"
                 type="submit"
               >
