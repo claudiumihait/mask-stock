@@ -35,21 +35,15 @@ const NavbarMain = (props) => {
                                     <Nav.Link eventKey={1} as={Button} size="lg">Order</Nav.Link>{' '}
                                 </Link>
                                 <Nav.Link eventKey={5} as={Button} onClick={() => {
-                                    fetch("http://localhost:9000/logout", {
-                                        method: "POST",
-                                        headers: {
-                                            "Content-Type": "application/json",
-                                        },
-                                        body: JSON.stringify({ username: props.logged }),
-                                    })
+                                    fetch("http://localhost:9000/user/logout")
                                         .then((response) => response.json())
                                         .then((data) => { data[0].status === "succesful" ? handleGoHome() : alert(`Logout ${data[0].status}. Try again later!`); })
-                                }}
+                                    }}
                                     size="lg">Logout</Nav.Link>{' '}
                             </>}
                         </Nav>
                     </Navbar.Collapse>
-                    {props.logged && <Navbar.Brand className="d-none d-md-block">{`Signed in as ${props.logged}`}</Navbar.Brand>}
+                    {props.logged && <Navbar.Brand style={{fontFamily:"cursive"}} className="d-none d-md-block">{`Signed in as ${props.logged}`}</Navbar.Brand>}
                 </Container>
             </Navbar>
         </Col>
