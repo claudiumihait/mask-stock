@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const hospitalSchema = new mongoose.Schema({
   id: { type: Number },
+  users:{ type: Array , default:[]},
   name: { type: String },
   address: {
     country_code: { type: String },
@@ -41,7 +42,6 @@ const hospitalSchema = new mongoose.Schema({
       address: { type: String },
     },
   },
-  users:{ type: Array },
   internal_comment: { type: String },
   partner_show_type: { type: String },
 });

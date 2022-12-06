@@ -28,15 +28,15 @@ router.post('/register', async (request, response) => {
     };
 });
 
-// router.post('/login', passport.authenticate('local', { session: false }), (request, response) => {
-//     if (request.isAuthenticated()) {
-//         const { _id, email } = request.user;
-//         console.log(_id);
-//         const token = tools.signToken(_id);
-//         response.cookie('qid', token, { httpOnly: true, sameSite: true });
-//         console.log(token);
-//         response.status(200).json({});
-//     }
-// })
+router.post('/login', passport.authenticate('local', { session: false }), (request, response) => {
+    if (request.isAuthenticated()) {
+        const { _id, email } = request.user;
+        console.log(_id);
+        const token = tools.signToken(_id);
+        response.cookie('qid', token, { httpOnly: true, sameSite: true });
+        console.log(token);
+        response.status(200).json({});
+    }
+});
 
 module.exports = router;

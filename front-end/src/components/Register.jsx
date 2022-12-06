@@ -14,7 +14,6 @@ const Register = () => {
   let timerIdRef = useRef();
 
   const navigate = useNavigate();
-  const handleGoHome = useCallback(() => navigate('/login', { replace: true }), [navigate]);
 
   const usernameChange = (name) => {
     setFormData({ username: name, email: formData.email, password: formData.password });
@@ -56,9 +55,10 @@ const Register = () => {
         body: JSON.stringify(formData),
       })
         .then((response) => response.json())
-        .then((data) => { setFinalStatus(data[0].status); timerIdRef.current = setTimeout(() => handleGoHome(), 2000); });
+        .then((data) => { setFinalStatus(data[0].status); timerIdRef.current = setTimeout(() => navigate("/"), 2000); });
     }
   }
+  
   
   return (
     <Col style={{ padding: "0" }} lg={{ span: 4, offset: 4 }} md={{ span: 6, offset: 3 }} xs={{ span: 8, offset: 2 }}>

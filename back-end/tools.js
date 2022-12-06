@@ -1,6 +1,7 @@
 const mongoose = require("mongoose");
 const userSchema = require("./models/users.model");
 const hospitalSchema = require("./models/hospitals.model");
+const productsSchema = require("./models/products.model")
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("dotenv").config;
@@ -74,6 +75,11 @@ const signToken = (userID) => {
     }, process.env.SECRET, { expiresIn: "1hr" });
 }
 
+const getProducts = async() => {
+    let products = await productsSchema.find()
+    return products
+}
+
 module.exports = {
     connectToDb,
     checkUsername,
@@ -82,5 +88,5 @@ module.exports = {
     getHospitalsByEmail,
     createUser,
     signToken,
-
+    getProducts,
 }
