@@ -1,32 +1,34 @@
-const express = require('express');
-const app = express();
-const cors = require('cors');
-const { default: mongoose } = require('mongoose');
-require('dotenv').config()
+const express = require("express");
+const config = require("dotenv").config;
+const cors = require("cors");
 
-// Mongo DB Connections
-mongoose.connect(process.env.MONGO_DB_URL, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-}).then(response=>{
-    console.log('MongoDB Connection Succeeded.')
-}).catch(error=>{
-    console.log('Error in DB connection: ' + error)
+const app = express();
+
+app.use(cors())
+
+//get all data from .env
+config();
+const port = process.env.PORT;
+
+//connect mask-stock database
+const tools = require("./tools.js");
+tools.connectToDb(process.env.ATLAS_URI);
+
+//parsing JSON requests to data -> req.body
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+//using all routes
+const registerRoute = require("./routes/register");
+app.use("/register", registerRoute);
+const loginRoute = require("./routes/login");
+app.use("/login", loginRoute);
+
+app.get("/", async (req, res) => {
+    let hospitalNames = await tools.getHospitalNames(process.env.ATLAS_URI);
+    res.send(hospitalNames);
 });
 
+//setting server port
+app.listen(port, _ => console.log(`http://127.0.0.1:${port}`));
 
-// Middleware Connections
-app.use(cors())
-app.use(express.json())
-
-
-// Routes
-app.get("/", (req,res)=>{
-    res.json({message: "GET ROUTE for /"})
-})
-
-// Connection
-const PORT = process.env.PORT
-app.listen(PORT, ()=>{
-    console.log('App running in port: '+PORT)
-})
