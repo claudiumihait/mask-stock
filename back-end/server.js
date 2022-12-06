@@ -1,9 +1,7 @@
 const express = require("express");
-const config = require("dotenv").config;
+require("dotenv").config();
 const cors = require("cors");
 const morgan = require("morgan");
-
-const app = express();
 const mongoose = require("mongoose");
 const Products = require("./models/products.model");
 const port = process.env.PORT;
@@ -11,9 +9,8 @@ const passport = require("passport");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 require("./passportSetup");
-
-
 const app = express();
+
 
 app.use(cors());
 app.use(morgan("dev"));
@@ -38,9 +35,6 @@ app.use((err, req, res, next) => {
 // app.use(cookieParser);
 app.use(passport.initialize());
 
-//get all data from .env
-config();
-const port = process.env.PORT || 9000;
 
 //connect mask-stock database
 const tools = require("./tools.js");
