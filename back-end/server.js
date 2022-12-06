@@ -4,7 +4,7 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+app.use(cors())
 
 //get all data from .env
 config();
@@ -31,3 +31,4 @@ app.get("/", async (req, res) => {
 
 //setting server port
 app.listen(port, _ => console.log(`http://127.0.0.1:${port}`));
+
