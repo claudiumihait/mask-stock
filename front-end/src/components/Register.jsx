@@ -36,15 +36,15 @@ const Register = () => {
   const checkCredential = (field, credential) => {
     field === "username"
       ? setFormData({
-          username: credential,
-          email: formData.email,
-          password: formData.password,
-        })
+        username: credential,
+        email: formData.email,
+        password: formData.password,
+      })
       : setFormData({
-          username: formData.username,
-          email: credential,
-          password: formData.password,
-        });
+        username: formData.username,
+        email: credential,
+        password: formData.password,
+      });
     fetch("http://localhost:9000/user/register", {
       method: "POST",
       headers: {
@@ -56,30 +56,30 @@ const Register = () => {
       .then((data) =>
         field === "username"
           ? setMessagesState({
-              password: messages.password,
-              email: messages.email,
-              username: data[0].message,
-            })
+            password: messages.password,
+            email: messages.email,
+            username: data[0].message,
+          })
           : setMessagesState({
-              password: messages.password,
-              email: data[0].message,
-              username: messages.username,
-            })
+            password: messages.password,
+            email: data[0].message,
+            username: messages.username,
+          })
       );
   };
 
   const passwordChange = (password) => {
     password.length < 7
       ? setMessagesState({
-          password: "Password too short.",
-          email: messages.email,
-          username: messages.username,
-        })
+        password: "Password too short.",
+        email: messages.email,
+        username: messages.username,
+      })
       : setMessagesState({
-          password: "Valid password.",
-          email: messages.email,
-          username: messages.username,
-        });
+        password: "Valid password.",
+        email: messages.email,
+        username: messages.username,
+      });
     setFormData({
       username: formData.username,
       email: formData.email,
