@@ -78,7 +78,9 @@ const Login = (props) => {
             </Form.Group>
 
             <div className="d-flex justify-content-center">
+
               <Button onClick={(event) => { event.preventDefault(); loginClick(loginDetails); }} variant="primary" type="submit" disabled={!successCondition}>
+
                 Log In
               </Button>
             </div>
