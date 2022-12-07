@@ -46,9 +46,9 @@ passport.use(new JWTStrategy({
     jwtFromRequest: cookieFromExtractor,
     passReqToCallback: true,
     secretOrKey: process.env.SECRET,
-}, (request, payload, done) => {
-    console.log(payload.sub);
-    userSchema.findOne({ _id: payload.sub }, (err, user) => {
+}, async (request, payload, done) => {
+    console.log(payload.SUB);
+    userSchema.findOne({ _id: payload.SUB }, (err, user) => {
         if (err) {
             return done(err);
         };

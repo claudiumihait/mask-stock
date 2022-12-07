@@ -32,7 +32,7 @@ app.use((err, req, res, next) => {
 // }));
 // app.use(passport.session());
 // require("./passportSetup")(passport);
-// app.use(cookieParser);
+app.use(cookieParser());
 app.use(passport.initialize());
 
 
