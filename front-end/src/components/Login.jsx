@@ -31,6 +31,7 @@ const Login = (props) => {
   const loginClick = (loginDetails) => {
     fetch("http://localhost:9000/user/login", {
       method: "POST",
+      withCredentials: true,
       headers: {
         "Content-Type": "application/json",
       },

@@ -45,11 +45,17 @@ router.post('/login', passport.authenticate('local', { session: false }), (reque
 router.get('/logout', passport.authenticate('jwt', { session: false }), async (request, response) => {
     console.log("----verificare logout----");
     await response.clearCookie('qid');
-    // res.redirect('/');
-    // req.session.destroy(function (err) {
-    //     res.redirect('/');
-    // });
     return response.json([{ status: "succesful" }]);
 });
+
+router.get("/authenticated", passport.authenticate('jwt', { session: false }), async (request, response) => {
+    const { username } = request.user;
+    response.status(200).json({
+        isAuthenticated: true,
+        user: {
+            username: username,
+        }
+    })
+})
 
 module.exports = router;
