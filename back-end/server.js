@@ -47,6 +47,8 @@ const productsModel = require("./models/products.model.js");
 //using all routes
 const userRoute = require("./routes/user");
 app.use("/user", userRoute);
+const hospitalRouter = require("./routes/hospital");
+app.use("/api/hospitals", hospitalRouter);
 
 // Routes
 app.get("/", async (req, res) => {

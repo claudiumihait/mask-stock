@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from "react";
+import React, { useState, useRef, usesetFields, useEffect } from "react";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
@@ -10,6 +10,7 @@ import succesfulLogo from "../../src/images/succesful.gif";
 const AddNew = () => {
   const [formData, setFormData] = useState({
     name: "",
+    users: [{ email: "", admin: false }],
     address: {
       country_code: "",
       post_code: "",
@@ -37,37 +38,87 @@ const AddNew = () => {
     },
     group_member_tax_number: "999",
   });
-  const [emailFields, setEmailFields] = useState([{ value: "" }]);
-  const [successMessage, setSuccessMessage] = useState("test");
-  const [successCondition, setSuccessCondition] = useState(false);
+  const [hospitalEmailsFields, setHospitalsEmailsFields] = useState([
+    { value: "" },
+  ]);
+  const [usersEmailsFields, setUsersEmailsFields] = useState([{ value: "" }]);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [validForm, setValidForm] = useState(false);
 
-  const addFormField = () => {
-    setEmailFields([...emailFields, { value: "" }]);
-  };
+  const addNewInputField = (forWho, setFields) =>
+    setFields([...forWho, { value: "" }]);
 
-  const handleRemoveField = (i) => {
-    setEmailFields(emailFields.filter((_, index) => index !== i));
+  const removeInputField = (forWho, i, property, setFields) => {
+    setFields(forWho.filter((_, index) => index !== i));
     const newFormData = { ...formData };
-    newFormData.emails.splice(i, 1);
+    newFormData[property].splice(i, 1);
     setFormData(newFormData);
   };
 
-  const handleInputChange = (e, i) => {
+  const handleEmails = (forWho, e, i, property, setFields) => {
     const newFormData = { ...formData };
-    newFormData.emails[i] = e.target.value;
+    property === "emails"
+      ? (newFormData[property][i] = e.target.value)
+      : (newFormData[property][i] = { email: e.target.value, admin: false });
     setFormData(newFormData);
-    const newEmailFields = [...emailFields];
+    const newEmailFields = [...forWho];
     newEmailFields[i].value = e.target.value;
-    setEmailFields(newEmailFields);
+    setFields(newEmailFields);
   };
 
-  const handleSubmit = () => {
-    //TODO
-    };
-    
-  //   useEffect(() => {
-  //     console.log("form data in useeffect", formData.emails);
-  //   }, [formData]);
+  const handleUserRights = (i) => {
+    const newFormData = { ...formData };
+    newFormData.users[i] = { ...newFormData.users[i], admin: true };
+    setFormData(newFormData);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    fetch("http://localhost:9000/api/hospitals", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(formData),
+    })
+      .then((res) => res.json())
+      .then((message) => setSuccessMessage(message))
+      .catch((e) => console.log(e));
+  };
+
+  const isFormValid = () => {
+    const {
+      name,
+      users,
+      address: { country_code },
+      address: { post_code },
+      address: { city },
+      address: { address },
+      emails,
+      taxcode,
+      iban,
+      swift,
+      account_number,
+      phone,
+    } = formData;
+
+    return (
+      name !== "" &&
+      users !== [] &&
+      country_code !== "" &&
+      post_code !== "" &&
+      city !== "" &&
+      address !== "" &&
+      emails !== [] &&
+      taxcode !== "" &&
+      iban !== "" &&
+      swift !== "" &&
+      account_number !== "" &&
+      phone !== ""
+    );
+  };
+
+  useEffect(() => {
+    setValidForm(isFormValid());
+  }, [formData]);
 
   return (
     <Col
@@ -185,18 +236,25 @@ const AddNew = () => {
               />
               <Form.Text>Phone number</Form.Text>
             </Form.Group>
-            <Form.Group className="mb-3" controlId="formBasicEmail">
-              <Form.Label>Emails</Form.Label>
-              {emailFields.map((_, i) => (
+            <Form.Group className="mb-3" controlId="formBasicHospitalEmail">
+              <Form.Label>Hospital emails</Form.Label>
+              {hospitalEmailsFields.map((_, i) => (
                 <div className="d-flex" key={i}>
-                  {console.log("ss")}
                   <Form.Control
                     className="mx-1 my-1"
                     required
                     type="text"
-                    value={formData.emails[i]}
-                    placeholder="Enter email"
-                    onChange={(e) => handleInputChange(e, i)}
+                    value={formData.emails[i] || ""}
+                    placeholder="Enter hospital email"
+                    onChange={(e) =>
+                      handleEmails(
+                        hospitalEmailsFields,
+                        e,
+                        i,
+                        "emails",
+                        setHospitalsEmailsFields
+                      )
+                    }
                   />
                   <Button
                     className="mx-1 my-1"
@@ -204,7 +262,14 @@ const AddNew = () => {
                     size="sm"
                     color="blue"
                     data-index={i}
-                    onClick={() => handleRemoveField(i)}
+                    onClick={() =>
+                      removeInputField(
+                        hospitalEmailsFields,
+                        i,
+                        "emails",
+                        setHospitalsEmailsFields
+                      )
+                    }
                   >
                     Remove
                   </Button>
@@ -216,9 +281,14 @@ const AddNew = () => {
                   variant="primary"
                   size="sm"
                   color="blue"
-                  onClick={() => addFormField()}
+                  onClick={() =>
+                    addNewInputField(
+                      hospitalEmailsFields,
+                      setHospitalsEmailsFields
+                    )
+                  }
                 >
-                  Add new email
+                  Add new hospital email
                 </Button>
               </div>
             </Form.Group>
@@ -260,8 +330,6 @@ const AddNew = () => {
                 }
               />
               <Form.Text>SWIFT</Form.Text>
-              <Form.Control type="text" placeholder="Enter SWIFT Code" />
-              <Form.Text>SWIFT</Form.Text>
               <Form.Control
                 required
                 type="text"
@@ -275,15 +343,75 @@ const AddNew = () => {
               />
               <Form.Text>Account Number</Form.Text>
             </Form.Group>
+            <Form.Group className="mb-3" controlId="formBasicUserEmail">
+              <Form.Label>Users emails</Form.Label>
+              {usersEmailsFields.map((_, i) => (
+                <div className="d-flex align-items-center" key={i}>
+                  <Form.Control
+                    className="mx-1 my-1"
+                    required
+                    type="text"
+                    //value={formData.users[i].email || ""}
+                    placeholder="Enter user email"
+                    onChange={(e) =>
+                      handleEmails(
+                        usersEmailsFields,
+                        e,
+                        i,
+                        "users",
+                        setUsersEmailsFields
+                      )
+                    }
+                  />
+                  <Form.Check
+                    className="mx-3"
+                    type="switch"
+                    id={`custom-switch-${i}`}
+                    label="Admin"
+                    onChange={() => handleUserRights(i)}
+                  />
+                  <Button
+                    className="mx-1 my-1"
+                    variant="primary"
+                    size="sm"
+                    color="blue"
+                    data-index={i}
+                    onClick={() =>
+                      removeInputField(
+                        usersEmailsFields,
+                        i,
+                        "users",
+                        setUsersEmailsFields
+                      )
+                    }
+                  >
+                    Remove
+                  </Button>
+                </div>
+              ))}
+              <div className="d-flex justify-content-center">
+                <Button
+                  className="mx-1 my-3"
+                  variant="primary"
+                  size="sm"
+                  color="blue"
+                  onClick={() =>
+                    addNewInputField(usersEmailsFields, setUsersEmailsFields)
+                  }
+                >
+                  Add new user email
+                </Button>
+              </div>
+            </Form.Group>
             <div className="d-flex justify-content-center">
               <Button
-                disabled={successCondition}
+                disabled={!validForm}
                 style={{ marginTop: "1rem" }}
                 onClick={(e) => handleSubmit(e)}
                 variant="primary"
                 type="submit"
               >
-                Add new
+                Submit
               </Button>
             </div>
             <Form.Text
@@ -294,7 +422,7 @@ const AddNew = () => {
                 marginTop: "1rem",
               }}
             >
-              {successMessage}
+              {successMessage ? successMessage : ""}
             </Form.Text>
           </Form>
         </Card.Body>
