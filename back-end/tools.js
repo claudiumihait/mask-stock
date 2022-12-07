@@ -31,7 +31,7 @@ const checkEmail = async (value) => {
     const hospitalsData = await hospitalSchema.find({}, { _id: 0, users: 1 });
     const usersOfHospitals = hospitalsData.map((obj) => obj.users);
     usersOfHospitals.forEach((item) => { item.forEach((obj) => { if (obj.email == value) { isValidHospitalMail = true; return } }) });
-    if (!value.match(/(.+)@(.+){2,}/i)) {
+    if (!value.match(/^((\w)+(\.)?(\w)+)(@){1}([a-z])+(\.){1}([a-zA-Z]){2,3}$/i)) {
         return "Invalid email."
     } else if (!isValidHospitalMail) { 
         return "Not a hospital email."
