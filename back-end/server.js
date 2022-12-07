@@ -2,10 +2,16 @@ const express = require("express");
 const config = require("dotenv").config;
 const cors = require("cors");
 const morgan = require("morgan");
+
+const app = express();
+const mongoose = require("mongoose");
+const Products = require("./models/products.model");
+const port = process.env.PORT;
 const passport = require("passport");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 require("./passportSetup");
+
 
 const app = express();
 
@@ -50,11 +56,23 @@ const productsModel = require("./models/products.model.js");
 const userRoute = require("./routes/user");
 app.use("/user", userRoute);
 
+
+// Routes
 app.get("/", async (req, res) => {
     let hospitalNames = await tools.getHospitalNames(process.env.ATLAS_URI);
     let productsName = await tools.getProducts()
     res.send(hospitalNames,productsName);
 });
+
+app.post("/order", async(req,res)=>{
+    const {hospital,product,quantity} = req.body
+    const updateQty = await Products.findOneAndUpdate({name:product},{$inc: { qty: -parseInt(quantity) }})
+    res.json({message:"order placed successfuly"})
+})
+app.get("/stocks", async (req,res)=>{
+    const products =  await Products.find({}, {_id:0,name:1,qty:1})
+    res.json(products)
+})
 
 app.get("/hospitals", async(req,res)=>{
     const response = await fetch("https://api.billingo.hu/v3/partners",{
