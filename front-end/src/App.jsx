@@ -9,6 +9,7 @@ import Home from "./components/Home";
 import Register from "./components/Register";
 import Login from "./components/Login";
 import Order from "./components/Order";
+import AddNew from "./components/AddNew";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -26,6 +27,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login setName={setLogged} />} />
             <Route path="/order" element={<Order />} />
+            <Route path="/add-new" element={<AddNew />} />
           </Routes>
         </Col>
       </Row>
