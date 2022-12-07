@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 const hospitalSchema = new mongoose.Schema({
   id: { type: Number },
-  users:{ type: Array , default:[]},
+  users: { type: Array, default: [] },
   name: { type: String },
   address: {
     country_code: { type: String },
@@ -23,7 +23,10 @@ const hospitalSchema = new mongoose.Schema({
     due_days: { type: Number, default: null },
     document_currency: { type: String },
     template_language_code: { type: String },
-    discount: { type: String, default: null },
+    discount: {
+      type: { type: String, default: null },
+      discount: { type: Number },
+    },
   },
   group_member_tax_number: { type: String },
   giro_settings: {
@@ -47,4 +50,3 @@ const hospitalSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("hospital", hospitalSchema);
-
