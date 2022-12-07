@@ -77,7 +77,7 @@ const Login = () => {
             </Form.Group>
 
             <div className="d-flex justify-content-center">
-              <Button onClick={(event) => { event.preventDefault(); registerClick(formData); }} variant="primary" type="submit">
+              <Button onClick={(event) => { event.preventDefault(); registerClick(loginDetails); }} variant="primary" type="submit">
                 Log In
               </Button>
             </div>
