@@ -351,7 +351,7 @@ const AddNew = () => {
                     className="mx-1 my-1"
                     required
                     type="text"
-                    //value={formData.users[i].email || ""}
+                    value={formData.users[i]?.email || ""}
                     placeholder="Enter user email"
                     onChange={(e) =>
                       handleEmails(
