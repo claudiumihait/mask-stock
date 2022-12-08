@@ -4,9 +4,12 @@ const cors = require("cors");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
 const Products = require("./models/products.model");
+const Hospitals = require("./models/hospitals.model");
+const Orders = require("./models/orders.model");
 const passport = require("passport");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
+const fs = require('fs');
 require("./passportSetup");
 const PORT = process.env.PORT || 9000;
 const app = express();
@@ -57,12 +60,43 @@ app.get("/", async (req, res) => {
 
 app.post("/order", async (req, res) => {
   const { hospital, product, quantity } = req.body;
+
+  let saveOrder = await Orders.create({client:hospital, product:product, qty:quantity})
   const updateQty = await Products.findOneAndUpdate(
     { name: product },
     { $inc: { qty: -parseInt(quantity) } }
   );
-  res.json({ message: "order placed successfuly" });
+
+  let client = await Hospitals.findOne({name:hospital})
+
+    let basket = {
+        "company": `${client.name}`,
+        "address": `${client.address.address}`,
+        "zip": `${client.address.post_code} ${client.address.country_code}`,
+        "city": `${client.address.city}`,
+        "country": `${client.address.country_code}`,
+        "iban":`${client.iban}`,
+        "swift":`${client.swift}`,
+        "accout":`${client.accout_number}`,
+        "phone":`${client.phone}`,
+        "description":`${product}`,
+        "quantity": `${quantity}`,
+        "tax_rate": `${client.group_member_tax_number}`,
+        "currency":`${client.custom_billing_settings.document_currency}`,
+        "due_days":`${client.custom_billing_settings.due_days}`
+    }
+
+    await tools.generateInvoice(basket)
+    res.json({ message: "Ok" });
+
 });
+
+app.get("/downloadInvoice", (req,res)=>{
+    const filePath = `${__dirname}/invoice.pdf`;
+
+    res.download(filePath);
+})
+
 app.get("/stocks", async (req, res) => {
   const products = await Products.find({}, { _id: 0, name: 1, qty: 1 });
   res.json(products);
