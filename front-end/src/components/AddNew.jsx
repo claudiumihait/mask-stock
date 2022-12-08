@@ -68,7 +68,10 @@ const AddNew = () => {
 
   const handleUserRights = (i) => {
     const newFormData = { ...formData };
-    newFormData.users[i] = { ...newFormData.users[i], admin: true };
+    newFormData.users[i] = {
+      ...newFormData.users[i],
+      admin: !newFormData.users[i].admin,
+    };
     setFormData(newFormData);
   };
 
@@ -118,6 +121,7 @@ const AddNew = () => {
 
   useEffect(() => {
     setValidForm(isFormValid());
+    console.log(formData.users);
   }, [formData]);
 
   return (
@@ -141,7 +145,7 @@ const AddNew = () => {
       >
         <Card.Img
           variant="top"
-          src={baseLogo}
+          src={!successMessage ? baseLogo : succesfulLogo}
           style={{ width: "50%", marginLeft: "25%" }}
         />
         <Card.Body>
@@ -365,6 +369,7 @@ const AddNew = () => {
                   />
                   <Form.Check
                     className="mx-3"
+                    checked={formData.users[i]?.admin || false}
                     type="switch"
                     id={`custom-switch-${i}`}
                     label="Admin"
