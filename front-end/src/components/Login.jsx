@@ -20,7 +20,7 @@ const Login = () => {
   const [showError, setShowError] = useState(false)
 
   const navigate = useNavigate();
-  const handleGoHome = useCallback(() => navigate('/', { replace: true }), [navigate]);
+  const handleGoHome = useCallback(() => navigate('/welcome', { replace: true }), [navigate]);
 
   const successCondition =
     loginDetails.password.length > 7 &&

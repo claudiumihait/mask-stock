@@ -110,6 +110,7 @@ const checkUserOnLogin = async (email, password) => {
   return user;
 };
 
+
 const getHospitalNames = async () => {
   let hospitalNames = await hospitalSchema.find({}, { _id: 0, name: 1 });
   return hospitalNames;
@@ -121,12 +122,18 @@ const getProducts = async () => {
 };
 
 const getUserById = async (id) => {
-  const user = await userSchema.findOne({ _id: id });
-  return user;
+    const user = await userSchema.findOne({ _id: id });
+    return user
+};
+
+const getHospitalDataByUserName = async (username) => {
+    const user = await userSchema.findOne({ username: username });
+    const hospitals = await hospitalSchema.find({ _id: { $in: user.hospitals } });
+    const result = hospitals.map((item) => { return { "Hospital Name": item.name, "Admin": item.users.filter((item) => item.email === user.email)[0].admin, "data": item } });
+    return result 
 };
 
 const generateInvoice = async(order) => {
-
     const today = new Date();
     let due_date = new Date();
     due_date.setDate(due_date.getDate() + parseInt(order.due_days))
@@ -254,4 +261,5 @@ module.exports = {
   checkUserOnLogin,
   getUserById,
   generateInvoice,
+  getHospitalDataByUserName
 };

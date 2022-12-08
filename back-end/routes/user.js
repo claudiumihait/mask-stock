@@ -73,28 +73,38 @@ router.post("/login", async (request, response, next) => {
 });
 
 router.post("/auth", async (request, response, next) => {
-  const token = request.body.token;
-  console.log(request.cookies);
-  if (token) {
-    jwt.verify(token, process.env.SECRET, async (error, decodedToken) => {
-      if (error) {
+    const token = request.body.token;
+    // console.log(request.cookies)
+    if (token) {
+        jwt.verify(token, process.env.SECRET, async (error, decodedToken) => {
+            if (error) {
+
+                response.json({ status: false });
+                next();
+            } else {
+                const user = await tools.getUserById(decodedToken.userID);
+                if (user) {
+                    response.json({ status: true, user: user.username });
+                } else {
+                    response.json({ status: false });
+                    next();
+                }
+            }
+        });
+    } else {
         response.json({ status: false });
         next();
-      } else {
-        const user = await tools.getUserById(decodedToken.userID);
-        if (user) {
-          response.json({ status: true, user: user.username });
-        } else {
-          response.json({ status: false });
-          next();
-        }
-      }
-    });
-  } else {
-    response.json({ status: false });
-    next();
-  }
+    }
 });
+
+router.post("/user-data", async (request, response, next) => {
+    try {
+        let result = await tools.getHospitalDataByUserName(request.body.username);
+        response.json({ result: result });
+    } catch (error) {
+        response.status(500).json({ "error": error });
+    };
+
 
 router.get("/auth/:id/:token", async (req, res, next) => {
   try {

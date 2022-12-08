@@ -12,7 +12,7 @@ const Header = () => {
         <Row>
             <Col style={{ padding: "0", width: "100%" }}>
                 <Routes>
-                    <Route exact path="/" element={<Image fluid src={HomeLogo} alt=""></Image>} />
+                    <Route path="/welcome" element={<Image fluid src={HomeLogo} alt=""></Image>} />
                     <Route path="/register" element={<Image fluid src={RegistrationLogo} alt=""></Image>} />
                     <Route path="/login" element={<Image fluid src={LoginLogo} alt=""></Image>} />
                 </Routes>

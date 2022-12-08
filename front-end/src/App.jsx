@@ -11,6 +11,7 @@ import Order from './components/Order';
 import AddNew from './components/AddNew';
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import Welcome from './components/Welcome';
 import Cookies from 'universal-cookie';
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
   let location = useLocation();
   const cookies = new Cookies();
   const [logged, setLogged] = useState(false);
+  const [tableData, setTableData] = useState([]);
   const jwtCookie = cookies.get("jwt");
   cookies.set('myCat', 'Pacman', { path: '/' });
 
@@ -42,23 +44,32 @@ function App() {
           body: JSON.stringify({ token: jwtCookie })
         });
         const data = await response.json();
-        console.log(data)
         if (!data.status) {
           cookies.remove("jwt");
           navigate("/login");
           setLogged(false);
         } else {
           setLogged(data.user);
-          console.log(data)
         }
       }
     };
     verifyUser();
-  }, [jwtCookie, location.pathname]);
+  }, [jwtCookie, location.pathname, navigate]);
 
   useEffect(() => {
-    console.log(logged)
-  })
+    if (logged) {
+      fetch("http://localhost:9000/user/user-data", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username: logged })
+      }).then((response) => response.json()).then((data) => {
+        setTableData(data.result);
+      }).catch((e) => console.log(e));
+    }
+  }, [logged])
 
   return (
     <Container fluid>
@@ -72,6 +83,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/order" element={<Order userName={logged}/>} />
             <Route path="/add-new" element={<AddNew />} />
+            <Route path="/welcome" element={tableData && <Welcome tableData={tableData} name={logged} />} />
           </Routes>
         </Col>
       </Row>
