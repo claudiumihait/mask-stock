@@ -5,6 +5,8 @@ const productsSchema = require("./models/products.model");
 const jwt = require("jsonwebtoken");
 const config = require("dotenv").config;
 const bcrypt = require("bcrypt");
+const easyinvoice = require('easyinvoice');
+const fs = require('fs');
 config();
 
 const connectToDb = (connectionURI) => {

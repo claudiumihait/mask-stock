@@ -111,7 +111,7 @@ app.post("/jobs", async(req,res)=>{
     const hospitals = await Users.findOne({username: userName.userName},{hospitals:1, _id:0})
     const nameHospitals = await Hospitals.find({_id : {$in : hospitals.hospitals}},{_id:0,name:1,users:1})
     let admin = nameHospitals.filter((item)=>{return item.users.filter(usr=>usr.email === userEmail[0].email)[0].admin})
-    const names = nameHospitals.map(item=>item.name,)
+
     res.json(admin)
 })
 
