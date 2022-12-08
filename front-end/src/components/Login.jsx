@@ -118,12 +118,21 @@ const Login = (props) => {
 
             <div className="d-flex justify-content-center">
               <Button
+                className="mx-3"
                 onClick={(event) => handleLogin(event, loginDetails)}
                 variant="primary"
                 type="submit"
                 disabled={!successCondition}
               >
                 Log In
+              </Button>{" "}
+              <Button
+                className="mx-3"
+                onClick={() => navigate("/register")}
+                variant="info"
+                type="button"
+              >
+                Sign Up
               </Button>
             </div>
             {incommingUsername && (
