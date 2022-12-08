@@ -80,7 +80,6 @@ const checkUserOnLogin = async (email, password) => {
     } else {
         throw Error("incorrect email");
     }
-    return user
 }
 
 const getHospitalNames = async () => {
@@ -96,6 +95,13 @@ const getProducts = async () => {
 const getUserById = async (id) => {
     const user = await userSchema.findOne({ _id: id });
     return user
+};
+
+const getHospitalDataByUserName = async (username) => {
+    const user = await userSchema.findOne({ username: username });
+    const hospitals = await hospitalSchema.find({ _id: { $in: user.hospitals } });
+    const result = hospitals.map((item) => { return { "Hospital Name": item.name, "Admin": item.users.filter((item) => item.email === user.email)[0].admin, "data": item } });
+    return result 
 }
 
 const generateInvoice = async (order) => {
@@ -213,5 +219,6 @@ module.exports = {
     getProducts,
     checkUserOnLogin,
     getUserById,
-    generateInvoice
+    generateInvoice,
+    getHospitalDataByUserName
 }

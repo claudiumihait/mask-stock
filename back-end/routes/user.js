@@ -59,7 +59,7 @@ router.post("/login", async (request, response, next) => {
 
 router.post("/auth", async (request, response, next) => {
     const token = request.body.token;
-    console.log(request.cookies)
+    // console.log(request.cookies)
     if (token) {
         jwt.verify(token, process.env.SECRET, async (error, decodedToken) => {
             if (error) {
@@ -80,8 +80,15 @@ router.post("/auth", async (request, response, next) => {
         response.json({ status: false });
         next();
     }
-})
+});
 
-
+router.post("/user-data", async (request, response, next) => {
+    try {
+        let result = await tools.getHospitalDataByUserName(request.body.username);
+        response.json({ result: result });
+    } catch (error) {
+        response.status(500).json({ "error": error });
+    };
+});
 
 module.exports = router;

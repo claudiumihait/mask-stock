@@ -105,7 +105,6 @@ const Register = () => {
           timerIdRef.current = setTimeout(() => {
             handleGoHome();
           }, 3000);
-          console.log(data);
         })
         .catch((e) => console.log(e));
 
