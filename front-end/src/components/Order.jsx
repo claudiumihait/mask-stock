@@ -35,7 +35,7 @@ const Order = () => {
 
 
     const sendOrder = async(e) => {
-        // e.preventDefault();
+        e.preventDefault();
 
         if(order.hospital && order.product && (parseInt(order.quantity) > 0 && order.quantity))
             {
@@ -46,8 +46,10 @@ const Order = () => {
                 },
                 body: JSON.stringify(order)
             })
-            const json = await response.json()
-            console.log(json)
+            
+            if(response.ok){
+                window.location = "http://localhost:9000/downloadInvoice"
+            }
         }else{
             alert("all field must be filled")
         }
