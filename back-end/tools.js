@@ -2,19 +2,15 @@ const mongoose = require("mongoose");
 const userSchema = require("./models/users.model");
 const hospitalSchema = require("./models/hospitals.model");
 const productsSchema = require("./models/products.model")
-const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("dotenv").config;
-const easyinvoice = require('easyinvoice');
-const fs = require('fs');
-
-
+const bcrypt = require("bcrypt");
+config();
 
 const connectToDb = (connectionURI) => {
     mongoose.connect(connectionURI)
         .catch((error) => console.error(error))
         .then((response) => console.log(`Connected to DB: ${response.connection.name}`))
-        // .then(async (response) => {});
 };
 
 const checkUsername = async (name) => {
@@ -35,11 +31,11 @@ const checkEmail = async (value) => {
     const hospitalsData = await hospitalSchema.find({}, { _id: 0, users: 1 });
     const usersOfHospitals = hospitalsData.map((obj) => obj.users);
     usersOfHospitals.forEach((item) => { item.forEach((obj) => { if (obj.email == value) { isValidHospitalMail = true; return } }) });
-    if (!value.match(/^((\w)+(\.)?(\w)+)(@){1}([a-z])+(\.){1}([a-zA-Z]){2,3}$/i)) {
+    if (!value.match(/(.+)@(.+){2,}/i)) {
         return "Invalid email."
-    } else if (!isValidHospitalMail) { 
+    } else if (!isValidHospitalMail) {
         return "Not a hospital email."
-    } else{
+    } else {
         let emails = await userSchema.find({}, { _id: 0, email: 1 });
         if (emails.map((obj) => obj.email).includes(value)) {
             return "Email already taken."
@@ -61,30 +57,48 @@ const createUser = async (name, mail, pass, hospitalIds) => {
     const user = new userSchema({ username: name, email: mail, password: pass, hospitals: hospitalIds });
     try {
         const newUser = await user.save();
-        return true
+        const token = signToken(user._id);
+        return [token, user._id]
     } catch (error) {
         return false
     }
 };
+
+const signToken = (userID) => {
+    return jwt.sign({ userID }, process.env.SECRET, { expiresIn: 3 * 24 * 60 * 60 });
+};
+
+const checkUserOnLogin = async (email, password) => {
+    const user = await userSchema.findOne({ email: email });
+    if (user) {
+        const auth = await bcrypt.compare(password, user.password);
+        if (auth) {
+            return user;
+        } else {
+            throw Error("incorrect password");
+        }
+    } else {
+        throw Error("incorrect email");
+    }
+    return user
+}
 
 const getHospitalNames = async () => {
     let hospitalNames = await hospitalSchema.find({}, { _id: 0, name: 1 });
     return hospitalNames
 };
 
-const signToken = (userID) => {
-    return jwt.sign({
-        iss: process.env.SECRET,
-        SUB: userID,
-    }, process.env.SECRET, { expiresIn: "1hr" });
-}
-
-const getProducts = async() => {
+const getProducts = async () => {
     let products = await productsSchema.find()
     return products
+};
+
+const getUserById = async (id) => {
+    const user = await userSchema.findOne({ _id: id });
+    return user
 }
 
-const generateInvoice = async(order) => {
+const generateInvoice = async (order) => {
     let data = {
         "client": {
             "company": order.company,
@@ -93,7 +107,7 @@ const generateInvoice = async(order) => {
             "city": order.city,
             "country": order.country
         },
-    
+
         "sender": {
             "company": "Sample Corp",
             "address": "Sample Street 123",
@@ -101,12 +115,12 @@ const generateInvoice = async(order) => {
             "city": "Bucharest",
             "country": "Romania"
         },
-    
+
         // Of course we would like to use our own logo and/or background on this invoice. There are a few ways to do this.
         "images": {
             logo: "https://public.easyinvoice.cloud/img/logo_en_original.png",
         },
-    
+
         // Let's add some standard invoice data, like invoice number, date and due-date
         "information": {
             // Invoice number
@@ -116,7 +130,7 @@ const generateInvoice = async(order) => {
             // Invoice due date
             "due-date": `${new Date().setDate(new Date() + order.due_days)}`
         },
-    
+
         // Now let's add some products! Calculations will be done automatically for you.
         "products": [
             {
@@ -126,10 +140,10 @@ const generateInvoice = async(order) => {
                 "price": 1
             }
         ],
-    
+
         // We will use bottomNotice to add a message of choice to the bottom of our invoice
         "bottomNotice": `Kindly pay your invoice within ${order.due_days} days.`,
-    
+
         // Here you can customize your invoice dimensions, currency, tax notation, and number formatting based on your locale
         "settings": {
             "currency": `${order.currency}`, // See documentation 'Locales and Currency' for more info. Leave empty for no currency.
@@ -150,7 +164,7 @@ const generateInvoice = async(order) => {
              "orientation": "landscape", // portrait or landscape, defaults to portrait
              */
         },
-    
+
         /*
             Last but not least, the translate parameter.
             Used for translating the invoice to your preferred language.
@@ -171,7 +185,7 @@ const generateInvoice = async(order) => {
              "total": "Totaal" // Defaults to 'Total'
              */
         },
-    
+
         /*
             Customize enables you to provide your own templates.
             Please review the documentation for instructions and examples.
@@ -188,7 +202,6 @@ const generateInvoice = async(order) => {
     });
 }
 
-
 module.exports = {
     connectToDb,
     checkUsername,
@@ -198,5 +211,7 @@ module.exports = {
     createUser,
     signToken,
     getProducts,
+    checkUserOnLogin,
+    getUserById,
     generateInvoice
 }

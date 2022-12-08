@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
@@ -6,24 +6,25 @@ import Col from "react-bootstrap/Col";
 import incorrectLogo from "../../src/images/wrong_creditentials.gif";
 import succesfulLogo from "../../src/images/succesful.gif";
 import loginLogo from "../../src/images/login_logo.png";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'universal-cookie';
 
-const Login = (props) => {
-  const [loginDetails, setLoginDetails] = useState({ password: "", email: "" });
-  const [incommingUsername, setIncommingUsername] = useState("");
-  const [errorMsg, setErrorMsg] = useState(false);
-  const [logo, setLogo] = useState(loginLogo);
-  const [counter, setCounter] = useState(20);
+const Login = () => {
   let timerIdRef = useRef();
+  const cookies = new Cookies();
+
+  const [loginDetails, setLoginDetails] = useState({ password: "", email: "" });
+  const [logo, setLogo] = useState(loginLogo);
+  const [succesfulCondition, setSuccesfulCondition] = useState(false);
+  const [showError, setShowError] = useState(false)
+
+  const navigate = useNavigate();
+  const handleGoHome = useCallback(() => navigate('/', { replace: true }), [navigate]);
 
   const successCondition =
     loginDetails.password.length > 7 &&
-    loginDetails.email.match(
-      /^((\w)+(\.)?(\w)+)(@){1}([a-z])+(\.){1}([a-zA-Z]){2,3}$/i
-    );
-
-  const navigate = useNavigate();
+    loginDetails.email.match(/(.+)@(.+){2,}/i);
 
   const setPassword = (pass) =>
     setLoginDetails({ password: pass, email: loginDetails.email });
@@ -31,41 +32,39 @@ const Login = (props) => {
   const setEmail = (mail) =>
     setLoginDetails({ password: loginDetails.password, email: mail });
 
-  useEffect(() => {
-    if (incommingUsername) setTimeout(() => setCounter(counter - 1), 1000);
-    if (counter === 0) {
-      props.setName(incommingUsername);
-      navigate("/");
-    }
-  }, [counter]);
-
-  const handleLogin = (e, loginDetails) => {
-    e.preventDefault();
-    fetch("http://localhost:9000/user/login", {
-      method: "POST",
-      withCredentials: true,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(loginDetails),
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data[0].status) {
-          setIncommingUsername(data[0].status);
-          setCounter(3);
+  const formSubmitHandler = (event) => {
+    event.preventDefault();
+    try {
+      fetch("http://localhost:9000/user/login", {
+        method: "POST",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(loginDetails),
+      }).then((response) => response.json()).then((data) => {
+        if (data.error) {
+          setLogo(incorrectLogo);
+          setShowError(true);
+          clearTimeout(timerIdRef.current);
+          timerIdRef.current = setTimeout(() => {
+            setLogo(loginLogo);
+            setShowError(false);
+          }, 1500);
+        } else {
+          cookies.set("jwt", data.token, { maxAge: data.maxAge, secure: true });
+          setLogo(succesfulLogo);
+          setSuccesfulCondition(true);
+          clearTimeout(timerIdRef.current);
+          timerIdRef.current = setTimeout(() => {
+            handleGoHome();
+          }, 3000);
         }
-      })
-      .catch((err) => {
-        console.log(err);
-        setLogo(incorrectLogo);
-        setErrorMsg(true);
-        timerIdRef.current = setTimeout(() => {
-          setLogo(loginLogo);
-          setErrorMsg(false);
-        }, 1400);
-      });
-  };
+      }).catch((e) => console.log(e));
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   return (
     <Col
@@ -87,7 +86,7 @@ const Login = (props) => {
         className="d-flex flex-column"
       >
         <Card.Img
-          src={incommingUsername ? succesfulLogo : logo}
+          src={logo}
           variant="top"
           style={{ width: "50%", marginLeft: "25%" }}
         />
@@ -118,49 +117,40 @@ const Login = (props) => {
 
             <div className="d-flex justify-content-center">
               <Button
-                className="mx-3"
-                onClick={(event) => handleLogin(event, loginDetails)}
+                onClick={(event) => formSubmitHandler(event)}
                 variant="primary"
                 type="submit"
-                disabled={!successCondition}
-              >
-                Log In
-              </Button>{" "}
-              <Button
-                className="mx-3"
-                onClick={() => navigate("/register")}
-                variant="info"
-                type="button"
-              >
-                Sign Up
+                disabled={!successCondition}>
+                Sign in
               </Button>
             </div>
-            {incommingUsername && (
-              <Form.Text
-                className="d-flex justify-content-center text-center"
-                style={{
-                  fontSize: "16px",
-                  color: "white",
-                  marginTop: "1rem",
-                }}
-              >
-                {"Succesfully logged in! You will be redirected to home page in " +
-                  counter +
-                  " secs..."}
-              </Form.Text>
-            )}
-            {errorMsg && (
-              <Form.Text
-                className="d-flex justify-content-center text-center"
-                style={{
-                  fontSize: "16px",
-                  color: "red",
-                  marginTop: "1rem",
-                }}
-              >
-                {"Wrong email or password!"}
-              </Form.Text>
-            )}
+            {!succesfulCondition && <Form.Text
+              className="d-flex justify-content-center text-center"
+              style={{
+                fontSize: "16px",
+                color: "white",
+                marginTop: "1rem",
+              }}>
+              Don't have an account? <Link to="/register">Register</Link>
+            </Form.Text>}
+            {succesfulCondition && <Form.Text
+              className="d-flex justify-content-center text-center"
+              style={{
+                fontSize: "16px",
+                color: "white",
+                marginTop: "1rem",
+              }}>
+              Sign in succesful! Redirecting you to home page.
+            </Form.Text>}
+            {showError && <Form.Text
+              className="d-flex justify-content-center text-center"
+              style={{
+                fontSize: "16px",
+                color: "red",
+                marginTop: "1rem",
+              }}>
+              Wrong credentials! Please try again.
+            </Form.Text>}
           </Form>
         </Card.Body>
       </Card>
