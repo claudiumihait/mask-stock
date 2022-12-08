@@ -1,14 +1,18 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
-import { useNavigate } from "react-router-dom";
 import registerLogo from "../../src/images/register_logo.png";
 import succesfulLogo from "../../src/images/succesful.gif";
-import { useEffect } from "react";
+import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import Cookies from 'universal-cookie';
 
 const Register = () => {
+  let timerIdRef = useRef();
+  const cookies = new Cookies();
+
   const [formData, setFormData] = useState({
     password: "",
     email: "",
@@ -19,19 +23,14 @@ const Register = () => {
     email: " We'll never share your email with anyone else.",
     username: "Prefered username.",
   });
-  const [successMessage, setSuccessMessage] = useState("");
-  const [counter, setCounter] = useState(4);
+  const [successCondition, setSuccessCondition] = useState(false);
 
   const navigate = useNavigate();
-  const successCondition =
-    messages.password === "Valid password." &&
+  const handleGoHome = useCallback(() => navigate('/', { replace: true }), [navigate]);
+
+  const completeCondition = messages.password === "Valid password." &&
     messages.email === "Valid email." &&
     messages.username === "Valid username.";
-
-  useEffect(() => {
-    if (successMessage) setTimeout(() => setCounter(counter - 1), 1000);
-    if (counter === 0) navigate("/login");
-  }, [counter]);
 
   const checkCredential = (field, credential) => {
     field === "username"
@@ -47,6 +46,7 @@ const Register = () => {
       });
     fetch("http://localhost:9000/user/register", {
       method: "POST",
+      credentials: "include",
       headers: {
         "Content-Type": "application/json",
       },
@@ -89,20 +89,26 @@ const Register = () => {
 
   const registerClick = (e, formData) => {
     e.preventDefault();
-    if (successCondition) {
+    if (completeCondition) {
       fetch("http://localhost:9000/user/register", {
         method: "POST",
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify(formData),
       })
-        .then((response) => response.json())
+        .then((response) => response.json()).then((data) => {
+          cookies.set("jwt", data[0].token, { maxAge: data[0].maxAge, secure: true });
+          setSuccessCondition(true);
+          clearTimeout(timerIdRef.current);
+          timerIdRef.current = setTimeout(() => {
+            handleGoHome();
+          }, 3000);
+          console.log(data);
+        })
         .catch((e) => console.log(e));
-      setSuccessMessage(
-        "Succesfully registered! You will be redirected to login page in "
-      );
-      setCounter(3);
+
     }
   };
 
@@ -202,7 +208,7 @@ const Register = () => {
             <div className="d-flex justify-content-center">
               <Button
                 style={{ marginTop: "1rem" }}
-                disabled={!successCondition}
+                disabled={!completeCondition}
                 onClick={(e) => registerClick(e, formData)}
                 variant="primary"
                 type="submit"
@@ -210,16 +216,24 @@ const Register = () => {
                 Register
               </Button>
             </div>
-            <Form.Text
+            {!successCondition && <Form.Text
               className="d-flex justify-content-center text-center"
               style={{
                 fontSize: "16px",
                 color: "white",
                 marginTop: "1rem",
-              }}
-            >
-              {successMessage ? successMessage + counter + " secs..." : ""}
-            </Form.Text>
+              }}>
+              Already have an account? <Link to="/login">Login</Link>
+            </Form.Text>}
+            {successCondition && <Form.Text
+              className="d-flex justify-content-center text-center"
+              style={{
+                fontSize: "16px",
+                color: "white",
+                marginTop: "1rem",
+              }}>
+              Sign up succesful! Redirecting you to home page.
+            </Form.Text>}
           </Form>
         </Card.Body>
       </Card>

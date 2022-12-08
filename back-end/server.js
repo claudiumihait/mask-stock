@@ -7,16 +7,19 @@ const Products = require("./models/products.model");
 const Hospitals = require("./models/hospitals.model");
 const Orders = require("./models/orders.model");
 const passport = require("passport");
-const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const fs = require('fs');
 require("./passportSetup");
 const PORT = process.env.PORT || 9000;
 const app = express();
 
-app.use(cors());
-app.use(morgan("dev"));
+//use cors
+app.use(cors({
+  origin: ["http://127.0.0.1:5173"],
+  credentials: true
+}));
 
+app.use(morgan("dev"));
 app.use((err, req, res, next) => {
   //res.status(err.status || 500);
   res.send({
@@ -27,15 +30,8 @@ app.use((err, req, res, next) => {
   });
 });
 
-// app.use(session({
-//     secret: process.env.SECRET,
-//     resave: true,
-//     saveUninitialized: true,
-// }));
-// app.use(passport.session());
-// require("./passportSetup")(passport);
 app.use(cookieParser());
-app.use(passport.initialize());
+
 
 //connect mask-stock database
 const tools = require("./tools.js");
@@ -44,8 +40,6 @@ tools.connectToDb(process.env.ATLAS_URI);
 //parsing JSON requests to data -> req.body
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
-
-const productsModel = require("./models/products.model.js");
 
 //using all routes
 const userRoute = require("./routes/user");
@@ -109,27 +103,6 @@ app.get("/stocks", async (req, res) => {
   res.json(products);
 });
 
-app.get("/hospitals", async (req, res) => {
-  const response = await fetch("https://api.billingo.hu/v3/partners", {
-    headers: {
-      "X-API-KEY": "2a808996-6f31-11ed-8f89-06ac9760f844",
-      "Content-Type": "application/json",
-    },
-  });
-  const json = await response.json();
-  if (response.ok) {
-    Hospitals.insertMany(json.data)
-      .then(function () {
-        console.log("Data inserted"); // Success
-      })
-      .catch(function (error) {
-        console.log("error: ", error); // Failure
-      });
-  }
-  if (!response.ok) {
-    res.status(400).json({ message: "something went wrong with get data" });
-  }
-});
 
 //setting server port
 app.listen(PORT, (_) => console.log(`http://127.0.0.1:${PORT}`));

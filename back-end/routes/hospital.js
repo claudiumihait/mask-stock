@@ -6,17 +6,16 @@ const Hospital = require("../models/hospitals.model");
 router.post("/", async (req, res) => {
   try {
     const newHospital = req.body;
-    console.log(newHospital);
     if (newHospital) {
       await new Hospital(newHospital).save();
-      res.json("Succesfully created new hospital");
+      res.json("Successfully created new hospital");
     } else {
-      res.json("Something went wrong, please check all fields!");
+      res.json("Something went wrong, please check all fields and try again!");
     }
     res.end();
   } catch (error) {
     console.log(error);
-    res.json("Something went wrong, please try submitting again");
+    res.json("Something went wrong with the server, please try submitting again");
   }
 });
 
