@@ -6,10 +6,9 @@ import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import InputGroup from 'react-bootstrap/InputGroup';
 import {useState, useEffect}  from 'react';
-
+import Cookies from 'universal-cookie';
 
 const Order = () => {
-
     const [order, setOrder] = useState({
         hospital: "",
         product: "",
@@ -17,6 +16,9 @@ const Order = () => {
     })
 
     const [stocks, setStocks] = useState(null)
+    const [error, setError] = useState("")
+    const [jobs, setJobs] = useState(null)
+    const [userName, setUserName] = useState(null)
 
     const getStock = async()=>{
         const response = await fetch("http://localhost:9000/stocks")
@@ -28,11 +30,45 @@ const Order = () => {
         return stocks
     }
 
+    const getHospitals = async(userName) => {
+        const response = await fetch("http://localhost:9000/jobs",{
+            method: "POST",
+            credentials:"include",
+            headers: {"Content-Type": "application/json"},
+            body: JSON.stringify({userName})
+        })
+        let raspuns = await response.json()
+        console.log(raspuns)
+        if(response.ok){
+            setJobs(raspuns)
+        }
+    }
+
+    const isAuth = async()=>{
+        const cookies = new Cookies();
+        const jwtCookie = cookies.get("jwt");
+
+        const response = await fetch("http://localhost:9000/user/auth", {
+            method: "POST",
+            credentials: "include",
+            headers: {
+            "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ token: jwtCookie })
+        });
+        const data = await response.json();
+        setUserName(data.user)
+
+        getHospitals(data.user)
+    }
+
     useEffect(()=>{
-        console.log(order)
+        isAuth()
+    },[])
+
+    useEffect(()=>{
         getStock()
     },[order])
-
 
     const sendOrder = async(e) => {
         e.preventDefault();
@@ -48,24 +84,27 @@ const Order = () => {
             })
             
             if(response.ok){
-                window.location = "http://localhost:9000/downloadInvoice"
+                    window.location = "http://localhost:9000/downloadInvoice"
             }
         }else{
-            alert("all field must be filled")
+            setError("All field must be filled!")
+            setTimeout(()=>{
+                setError("")
+            },3000)
         }
     }
 
     return ( 
-        <Container fluid id="order">
+        <Container fluid >
             <Row>
-                <Col lg={{ span: 8, offset: 5 }}>
+                <Col className="text-center">
                     <h1>Place orders</h1>
                 </Col>
             </Row>
-            <Row>
-                <Col md={{ span: 8, offset: 4 }}>
-                    <Card style={{ width: '25rem' }}>
-                        <Card.Img variant="top" src="https://w7.pngwing.com/pngs/531/816/png-transparent-hospital-patient-free-content-s-building-center-logo-cartoon-website.png" />
+            <Row className="d-flex justify-content-center">
+                <Col sm={6} md={6} lg={6}>
+                    <Card bg="dark" text="white">
+                        <Card.Img variant="top" src="https://static.vecteezy.com/system/resources/previews/004/493/181/original/hospital-building-for-healthcare-background-illustration-with-ambulance-car-doctor-patient-nurses-and-medical-clinic-exterior-free-vector.jpg" />
                         <Card.Body>
                             <Card.Title>Place orders</Card.Title>
                             {stocks&&
@@ -76,9 +115,9 @@ const Order = () => {
                                     <InputGroup.Text id="basic-addon1">Hospital: </InputGroup.Text>
                                     <Form.Select aria-label="Default select example" onChange={(e)=>setOrder({...order, hospital:e.target.value})}>
                                         <option>Select a hospital</option>
-                                        <option value="Pécsi Irgalmasrendi Kórház">Pécsi Irgalmasrendi Kórház</option>
-                                        <option value="Miskolci Semmelweis Ignác Egészségügyi Központ és Egyetemi Oktatókórház">Miskolci Semmelweis Ignác Egészségügyi Központ és Egyetemi Oktatókórház</option>
-                                        <option value="Szent Pantaleon Kórház Kht">Szent Pantaleon Kórház Kht</option>
+                                        {jobs&&
+                                            jobs.map((hospital,i)=><option key={i} value={`${hospital.name}`}>{`${hospital.name}`}</option>)
+                                        }
                                     </Form.Select>
                                 </InputGroup>
                                 <InputGroup className="mb-3">
@@ -94,8 +133,9 @@ const Order = () => {
                                     <InputGroup.Text id="basic-addon1">Quantity:</InputGroup.Text>
                                     <Form.Control type="number" placeholder="123" onChange={(e)=>setOrder({...order, quantity:e.target.value})}/>
                                 </InputGroup>
+                                
+                                {error&&<h2 id="err" className="text-center">{error}</h2>}
 
-                            
                                 <Button variant="primary" type="submit" onClick={(e)=>sendOrder(e)}>
                                     Place order
                                 </Button>

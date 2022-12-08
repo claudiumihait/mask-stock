@@ -1,95 +1,124 @@
 const mongoose = require("mongoose");
 const userSchema = require("./models/users.model");
 const hospitalSchema = require("./models/hospitals.model");
-const productsSchema = require("./models/products.model")
+const productsSchema = require("./models/products.model");
 const jwt = require("jsonwebtoken");
 const config = require("dotenv").config;
 const bcrypt = require("bcrypt");
+const easyinvoice = require('easyinvoice');
+const fs = require('fs');
 config();
 
 const connectToDb = (connectionURI) => {
-    mongoose.connect(connectionURI)
-        .catch((error) => console.error(error))
-        .then((response) => console.log(`Connected to DB: ${response.connection.name}`))
+  mongoose
+    .connect(connectionURI)
+    .catch((error) => console.error(error))
+    .then((response) =>
+      console.log(`Connected to DB: ${response.connection.name}`)
+    );
 };
 
 const checkUsername = async (name) => {
-    if (name.length < 5) {
-        return "Username too short."
+  if (name.length < 5) {
+    return "Username too short.";
+  } else {
+    let usernames = await userSchema.find({}, { _id: 0, username: 1 });
+    if (usernames.map((obj) => obj.username).includes(name)) {
+      return "Username already taken.";
     } else {
-        let usernames = await userSchema.find({}, { _id: 0, username: 1 });
-        if (usernames.map((obj) => obj.username).includes(name)) {
-            return "Username already taken."
-        } else {
-            return "Valid username."
-        }
+      return "Valid username.";
     }
+  }
 };
 
 const checkEmail = async (value) => {
-    let isValidHospitalMail = false;
-    const hospitalsData = await hospitalSchema.find({}, { _id: 0, users: 1 });
-    const usersOfHospitals = hospitalsData.map((obj) => obj.users);
-    usersOfHospitals.forEach((item) => { item.forEach((obj) => { if (obj.email == value) { isValidHospitalMail = true; return } }) });
-    if (!value.match(/(.+)@(.+){2,}/i)) {
-        return "Invalid email."
-    } else if (!isValidHospitalMail) {
-        return "Not a hospital email."
+  let isValidHospitalMail = false;
+  const hospitalsData = await hospitalSchema.find({}, { _id: 0, users: 1 });
+  const usersOfHospitals = hospitalsData.map((obj) => obj.users);
+  usersOfHospitals.forEach((item) => {
+    item.forEach((obj) => {
+      if (obj.email == value) {
+        isValidHospitalMail = true;
+        return;
+      }
+    });
+  });
+  if (!value.match(/(.+)@(.+){2,}/i)) {
+    return "Invalid email.";
+  } else if (!isValidHospitalMail) {
+    return "Not a hospital email.";
+  } else {
+    let emails = await userSchema.find({}, { _id: 0, email: 1 });
+    if (emails.map((obj) => obj.email).includes(value)) {
+      return "Email already taken.";
     } else {
-        let emails = await userSchema.find({}, { _id: 0, email: 1 });
-        if (emails.map((obj) => obj.email).includes(value)) {
-            return "Email already taken."
-        } else {
-            return "Valid email."
-        }
+      return "Valid email.";
     }
+  }
 };
 
 const getHospitalsByEmail = async (value) => {
-    let hospitalIds = [];
-    const hospitalsAndUsers = await hospitalSchema.find({}, { _id: 1, users: 1 });
-    const usersOfHospitals = hospitalsAndUsers.map((item) => item.users);
-    usersOfHospitals.forEach((item, index) => { item.forEach((obj) => { if (obj.email === value) { hospitalIds.push(hospitalsAndUsers[index]._id); return } }) });
-    return hospitalIds
+  let hospitalIds = [];
+  const hospitalsAndUsers = await hospitalSchema.find({}, { _id: 1, users: 1 });
+  const usersOfHospitals = hospitalsAndUsers.map((item) => item.users);
+  usersOfHospitals.forEach((item, index) => {
+    item.forEach((obj) => {
+      if (obj.email === value) {
+        hospitalIds.push(hospitalsAndUsers[index]._id);
+        return;
+      }
+    });
+  });
+  return hospitalIds;
 };
 
 const createUser = async (name, mail, pass, hospitalIds) => {
-    const user = new userSchema({ username: name, email: mail, password: pass, hospitals: hospitalIds });
-    try {
-        const newUser = await user.save();
-        const token = signToken(user._id);
-        return [token, user._id]
-    } catch (error) {
-        return false
-    }
+  const user = new userSchema({
+    username: name,
+    email: mail,
+    password: pass,
+    hospitals: hospitalIds,
+  });
+  try {
+    const newUser = await user.save();
+    const token = signToken(user._id);
+    return [token, user._id];
+  } catch (error) {
+    return false;
+  }
 };
 
 const signToken = (userID) => {
-    return jwt.sign({ userID }, process.env.SECRET, { expiresIn: 3 * 24 * 60 * 60 });
+  return jwt.sign({ userID }, process.env.SECRET, {
+    expiresIn: 3 * 24 * 60 * 60,
+  });
 };
 
 const checkUserOnLogin = async (email, password) => {
-    const user = await userSchema.findOne({ email: email });
-    if (user) {
-        const auth = await bcrypt.compare(password, user.password);
-        if (auth) {
-            return user;
-        } else {
-            throw Error("incorrect password");
-        }
+  const user = await userSchema.findOne({ email: email });
+  if (user) {
+    const auth = await bcrypt.compare(password, user.password);
+    console.log(user);
+    if (auth && user.verified) {
+      return user;
     } else {
-        throw Error("incorrect email");
+      throw Error("incorrect password");
     }
-}
+  } else {
+    throw Error("incorrect email");
+  }
+  return user;
+};
+
 
 const getHospitalNames = async () => {
-    let hospitalNames = await hospitalSchema.find({}, { _id: 0, name: 1 });
-    return hospitalNames
+  let hospitalNames = await hospitalSchema.find({}, { _id: 0, name: 1 });
+  return hospitalNames;
 };
 
 const getProducts = async () => {
-    let products = await productsSchema.find()
-    return products
+  let products = await productsSchema.find();
+  return products;
 };
 
 const getUserById = async (id) => {
@@ -102,16 +131,24 @@ const getHospitalDataByUserName = async (username) => {
     const hospitals = await hospitalSchema.find({ _id: { $in: user.hospitals } });
     const result = hospitals.map((item) => { return { "Hospital Name": item.name, "Admin": item.users.filter((item) => item.email === user.email)[0].admin, "data": item } });
     return result 
-}
+};
 
-const generateInvoice = async (order) => {
+const generateInvoice = async(order) => {
+    const today = new Date();
+    let due_date = new Date();
+    due_date.setDate(due_date.getDate() + parseInt(order.due_days))
+
     let data = {
         "client": {
             "company": order.company,
             "address": order.address,
             "zip": order.zip,
             "city": order.city,
-            "country": order.country
+            "country": order.country,
+            "iban": order.iban,
+            "swift":order.swift,
+            "account":order.account,
+            "phone":order.phone
         },
 
         "sender": {
@@ -132,24 +169,25 @@ const generateInvoice = async (order) => {
             // Invoice number
             "number": "2021.0001",
             // Invoice data
-            "date": `${new Date()}`,
+            "date": today.toLocaleDateString(),
             // Invoice due date
-            "due-date": `${new Date().setDate(new Date() + order.due_days)}`
+            "due-date": due_date.toLocaleDateString()
         },
 
         // Now let's add some products! Calculations will be done automatically for you.
         "products": [
             {
-                "quantity": `${order.quantity}`,
-                "description": `${order.description}`,
-                "tax-rate": order.tax_rate,
+                "quantity": order.quantity,
+                "description": order.description,
+                "tax-rate": parseInt(order.tax_rate),
                 "price": 1
             }
         ],
 
         // We will use bottomNotice to add a message of choice to the bottom of our invoice
-        "bottomNotice": `Kindly pay your invoice within ${order.due_days} days.`,
 
+        "bottom-notice": `Kindly pay your invoice within ${order.due_days} days.`,
+ 
         // Here you can customize your invoice dimensions, currency, tax notation, and number formatting based on your locale
         "settings": {
             "currency": `${order.currency}`, // See documentation 'Locales and Currency' for more info. Leave empty for no currency.
@@ -169,16 +207,16 @@ const generateInvoice = async (order) => {
              "width": "500px", // allowed units: mm, cm, in, px
              "orientation": "landscape", // portrait or landscape, defaults to portrait
              */
-        },
+    },
 
-        /*
+    /*
             Last but not least, the translate parameter.
             Used for translating the invoice to your preferred language.
             Defaults to English. Below example is translated to Dutch.
             We will not use translate in this sample to keep our samples readable.
          */
-        "translate": {
-            /*
+    translate: {
+      /*
              "invoice": "FACTUUR",  // Default to 'INVOICE'
              "number": "Nummer", // Defaults to 'Number'
              "date": "Datum", // Default to 'Date'
@@ -190,35 +228,38 @@ const generateInvoice = async (order) => {
              "product-total": "Totaal", // Defaults to 'Total'
              "total": "Totaal" // Defaults to 'Total'
              */
-        },
+    },
 
-        /*
+    /*
             Customize enables you to provide your own templates.
             Please review the documentation for instructions and examples.
             Leave this option blank to use the default template
          */
-    };
+  };
 
-    easyinvoice.createInvoice(data, function (result) {
-        //The response will contain a base64 encoded PDF file
-        var pdf = result.pdf;
+    // easyinvoice.createInvoice(data, function (result) {
+    //     //The response will contain a base64 encoded PDF file
+    //     var pdf = result.pdf;
 
-        //Now let's save our invoice to our local filesystem
-        fs.writeFileSync("invoice.pdf", pdf, 'base64');
-    });
+    //     //Now let's save our invoice to our local filesystem
+    //     fs.writeFileSync("invoice.pdf", pdf, 'base64');
+    // });
+    console.log("verificare data: ", data)
+    const result = await easyinvoice.createInvoice(data);
+    fs.writeFileSync("invoice.pdf", result.pdf, 'base64');
 }
 
 module.exports = {
-    connectToDb,
-    checkUsername,
-    checkEmail,
-    getHospitalNames,
-    getHospitalsByEmail,
-    createUser,
-    signToken,
-    getProducts,
-    checkUserOnLogin,
-    getUserById,
-    generateInvoice,
-    getHospitalDataByUserName
-}
+  connectToDb,
+  checkUsername,
+  checkEmail,
+  getHospitalNames,
+  getHospitalsByEmail,
+  createUser,
+  signToken,
+  getProducts,
+  checkUserOnLogin,
+  getUserById,
+  generateInvoice,
+  getHospitalDataByUserName
+};

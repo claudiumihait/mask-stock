@@ -76,12 +76,12 @@ function App() {
       <Header />
       <NavbarMain logged={logged} />
       <Row style={{ background: "linear-gradient(#e66465, #9198e5)" }}>
-        <Col>
+        <Col id="order">
           <Routes>
             <Route exact path="/" element={<Home />} />
             <Route path="/register" element={<Register />} />
             <Route path="/login" element={<Login />} />
-            <Route path="/order" element={<Order />} />
+            <Route path="/order" element={<Order userName={logged}/>} />
             <Route path="/add-new" element={<AddNew />} />
             <Route path="/welcome" element={tableData && <Welcome tableData={tableData} name={logged} />} />
           </Routes>
