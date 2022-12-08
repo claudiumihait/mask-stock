@@ -6,6 +6,7 @@ const mongoose = require("mongoose");
 const Products = require("./models/products.model");
 const Hospitals = require("./models/hospitals.model");
 const Orders = require("./models/orders.model");
+const Users = require("./models/users.model");
 const passport = require("passport");
 const cookieParser = require("cookie-parser");
 const fs = require('fs');
@@ -53,6 +54,7 @@ app.get("/", async (req, res) => {
   let productsName = await tools.getProducts();
   res.send(hospitalNames, productsName);
 });
+
 
 app.post("/order", async (req, res) => {
   const { hospital, product, quantity } = req.body;
@@ -103,6 +105,15 @@ app.get("/stocks", async (req, res) => {
   res.json(products);
 });
 
+app.post("/jobs", async(req,res)=>{
+    const userName = req.body
+    const userEmail = await Users.find({username: userName.userName},{_id:0,email:1})
+    const hospitals = await Users.findOne({username: userName.userName},{hospitals:1, _id:0})
+    const nameHospitals = await Hospitals.find({_id : {$in : hospitals.hospitals}},{_id:0,name:1,users:1})
+    let admin = nameHospitals.filter((item)=>{return item.users.filter(usr=>usr.email === userEmail[0].email)[0].admin})
+    const names = nameHospitals.map(item=>item.name,)
+    res.json(admin)
+})
 
 //setting server port
 app.listen(PORT, (_) => console.log(`http://127.0.0.1:${PORT}`));

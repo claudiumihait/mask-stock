@@ -10,3 +10,12 @@ body {
 #order{
   min-height: 100vh;
 }
+
+#err{
+  background: -webkit-linear-gradient(to top, #ed213a, #93291e);
+  background: linear-gradient(to top, #ed213a, #93291e);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent; 
+  -moz-background-clip: text;
+  -moz-text-fill-color: transparent;
+}
