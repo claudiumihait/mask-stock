@@ -45,23 +45,23 @@ const AddNew = () => {
   const [successMessage, setSuccessMessage] = useState("");
   const [validForm, setValidForm] = useState(false);
 
-  const addNewInputField = (forWho, setFields) =>
-    setFields([...forWho, { value: "" }]);
+  const addNewInputField = (whoseFields, setFields) =>
+    setFields([...whoseFields, { value: "" }]);
 
-  const removeInputField = (forWho, i, property, setFields) => {
-    setFields(forWho.filter((_, index) => index !== i));
+  const removeInputField = (whoseFields, i, property, setFields) => {
+    setFields(whoseFields.filter((_, index) => index !== i));
     const newFormData = { ...formData };
     newFormData[property].splice(i, 1);
     setFormData(newFormData);
   };
 
-  const handleEmails = (forWho, e, i, property, setFields) => {
+  const handleEmails = (whoseFields, e, i, property, setFields) => {
     const newFormData = { ...formData };
     property === "emails"
       ? (newFormData[property][i] = e.target.value)
       : (newFormData[property][i] = { email: e.target.value, admin: false });
     setFormData(newFormData);
-    const newEmailFields = [...forWho];
+    const newEmailFields = [...whoseFields];
     newEmailFields[i].value = e.target.value;
     setFields(newEmailFields);
   };
