@@ -5,13 +5,13 @@ import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import registerLogo from "../../src/images/register_logo.png";
 import succesfulLogo from "../../src/images/succesful.gif";
-import { Link } from 'react-router-dom';
-import { useNavigate } from 'react-router-dom';
-import Cookies from 'universal-cookie';
+import { Link } from "react-router-dom";
+// import { useNavigate } from "react-router-dom";
+// import Cookies from "universal-cookie";
 
 const Register = () => {
-  let timerIdRef = useRef();
-  const cookies = new Cookies();
+  // let timerIdRef = useRef();
+  // const cookies = new Cookies();
 
   const [formData, setFormData] = useState({
     password: "",
@@ -25,25 +25,29 @@ const Register = () => {
   });
   const [successCondition, setSuccessCondition] = useState(false);
 
-  const navigate = useNavigate();
-  const handleGoHome = useCallback(() => navigate('/', { replace: true }), [navigate]);
+  //const navigate = useNavigate();
+  // const handleGoHome = useCallback(
+  //   () => navigate("/", { replace: true }),
+  //   [navigate]
+  // );
 
-  const completeCondition = messages.password === "Valid password." &&
+  const completeCondition =
+    messages.password === "Valid password." &&
     messages.email === "Valid email." &&
     messages.username === "Valid username.";
 
   const checkCredential = (field, credential) => {
     field === "username"
       ? setFormData({
-        username: credential,
-        email: formData.email,
-        password: formData.password,
-      })
+          username: credential,
+          email: formData.email,
+          password: formData.password,
+        })
       : setFormData({
-        username: formData.username,
-        email: credential,
-        password: formData.password,
-      });
+          username: formData.username,
+          email: credential,
+          password: formData.password,
+        });
     fetch("http://localhost:9000/user/register", {
       method: "POST",
       credentials: "include",
@@ -56,30 +60,30 @@ const Register = () => {
       .then((data) =>
         field === "username"
           ? setMessagesState({
-            password: messages.password,
-            email: messages.email,
-            username: data[0].message,
-          })
+              password: messages.password,
+              email: messages.email,
+              username: data[0].message,
+            })
           : setMessagesState({
-            password: messages.password,
-            email: data[0].message,
-            username: messages.username,
-          })
+              password: messages.password,
+              email: data[0].message,
+              username: messages.username,
+            })
       );
   };
 
   const passwordChange = (password) => {
     password.length < 7
       ? setMessagesState({
-        password: "Password too short.",
-        email: messages.email,
-        username: messages.username,
-      })
+          password: "Password too short.",
+          email: messages.email,
+          username: messages.username,
+        })
       : setMessagesState({
-        password: "Valid password.",
-        email: messages.email,
-        username: messages.username,
-      });
+          password: "Valid password.",
+          email: messages.email,
+          username: messages.username,
+        });
     setFormData({
       username: formData.username,
       email: formData.email,
@@ -98,17 +102,16 @@ const Register = () => {
         },
         body: JSON.stringify(formData),
       })
-        .then((response) => response.json()).then((data) => {
-          cookies.set("jwt", data[0].token, { maxAge: data[0].maxAge, secure: true });
+        .then((response) => response.json())
+        .then((data) => {
+          //cookies.set("jwt", data[0].token, { maxAge: data[0].maxAge, secure: true });
           setSuccessCondition(true);
-          clearTimeout(timerIdRef.current);
-          timerIdRef.current = setTimeout(() => {
-            handleGoHome();
-          }, 3000);
-          console.log(data);
+          // clearTimeout(timerIdRef.current);
+          // timerIdRef.current = setTimeout(() => {
+          //   handleGoHome();
+          // }, 3000);
         })
         .catch((e) => console.log(e));
-
     }
   };
 
@@ -216,24 +219,31 @@ const Register = () => {
                 Register
               </Button>
             </div>
-            {!successCondition && <Form.Text
-              className="d-flex justify-content-center text-center"
-              style={{
-                fontSize: "16px",
-                color: "white",
-                marginTop: "1rem",
-              }}>
-              Already have an account? <Link to="/login">Login</Link>
-            </Form.Text>}
-            {successCondition && <Form.Text
-              className="d-flex justify-content-center text-center"
-              style={{
-                fontSize: "16px",
-                color: "white",
-                marginTop: "1rem",
-              }}>
-              Sign up succesful! Redirecting you to home page.
-            </Form.Text>}
+            {!successCondition && (
+              <Form.Text
+                className="d-flex justify-content-center text-center"
+                style={{
+                  fontSize: "16px",
+                  color: "white",
+                  marginTop: "1rem",
+                }}
+              >
+                Already have an account? <Link to="/login"> Login</Link>
+              </Form.Text>
+            )}
+            {successCondition && (
+              <Form.Text
+                className="d-flex justify-content-center text-center"
+                style={{
+                  fontSize: "16px",
+                  color: "white",
+                  marginTop: "1rem",
+                }}
+              >
+                Succefully registered! Please check your e-mail and verify your
+                account in order to log in.
+              </Form.Text>
+            )}
           </Form>
         </Card.Body>
       </Card>
