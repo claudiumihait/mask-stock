@@ -73,7 +73,7 @@ app.post("/order", async (req, res) => {
         "country": `${client.address.country_code}`,
         "iban":`${client.iban}`,
         "swift":`${client.swift}`,
-        "accout":`${client.accout_number}`,
+        "account":`${client.account_number}`,
         "phone":`${client.phone}`,
         "description":`${product}`,
         "quantity": `${quantity}`,
@@ -87,10 +87,15 @@ app.post("/order", async (req, res) => {
 
 });
 
-app.get("/downloadInvoice", (req,res)=>{
+app.get("/downloadInvoice", async(req,res)=>{
     const filePath = `${__dirname}/invoice.pdf`;
-
-    res.download(filePath);
+    // filePath? res.download(filePath) : null;
+    if(filePath){
+        res.download(filePath)
+        setTimeout(()=>{
+            fs.unlinkSync(filePath)
+        },5000)
+    }
 })
 
 app.get("/stocks", async (req, res) => {

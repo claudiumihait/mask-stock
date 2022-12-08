@@ -48,7 +48,7 @@ const Order = () => {
             })
             
             if(response.ok){
-                window.location = "http://localhost:9000/downloadInvoice"
+                    window.location = "http://localhost:9000/downloadInvoice"
             }
         }else{
             alert("all field must be filled")

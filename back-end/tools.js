@@ -123,57 +123,67 @@ const getUserById = async (id) => {
   return user;
 };
 
-const generateInvoice = async (order) => {
-  let data = {
-    client: {
-      company: order.company,
-      address: order.address,
-      zip: order.zip,
-      city: order.city,
-      country: order.country,
-    },
+const generateInvoice = async(order) => {
 
-    sender: {
-      company: "Sample Corp",
-      address: "Sample Street 123",
-      zip: "1234 RO",
-      city: "Bucharest",
-      country: "Romania",
-    },
+    const today = new Date();
+    let due_date = new Date();
+    due_date.setDate(due_date.getDate() + parseInt(order.due_days))
 
-    // Of course we would like to use our own logo and/or background on this invoice. There are a few ways to do this.
-    images: {
-      logo: "https://public.easyinvoice.cloud/img/logo_en_original.png",
-    },
+    let data = {
+        "client": {
+            "company": order.company,
+            "address": order.address,
+            "zip": order.zip,
+            "city": order.city,
+            "country": order.country,
+            "iban": order.iban,
+            "swift":order.swift,
+            "account":order.account,
+            "phone":order.phone
+        },
 
-    // Let's add some standard invoice data, like invoice number, date and due-date
-    information: {
-      // Invoice number
-      number: "2021.0001",
-      // Invoice data
-      date: `${new Date()}`,
-      // Invoice due date
-      "due-date": `${new Date().setDate(new Date() + order.due_days)}`,
-    },
+        "sender": {
+            "company": "Sample Corp",
+            "address": "Sample Street 123",
+            "zip": "1234 RO",
+            "city": "Bucharest",
+            "country": "Romania"
+        },
 
-    // Now let's add some products! Calculations will be done automatically for you.
-    products: [
-      {
-        quantity: `${order.quantity}`,
-        description: `${order.description}`,
-        "tax-rate": order.tax_rate,
-        price: 1,
-      },
-    ],
+        // Of course we would like to use our own logo and/or background on this invoice. There are a few ways to do this.
+        "images": {
+            logo: "https://public.easyinvoice.cloud/img/logo_en_original.png",
+        },
 
-    // We will use bottomNotice to add a message of choice to the bottom of our invoice
-    bottomNotice: `Kindly pay your invoice within ${order.due_days} days.`,
+        // Let's add some standard invoice data, like invoice number, date and due-date
+        "information": {
+            // Invoice number
+            "number": "2021.0001",
+            // Invoice data
+            "date": today.toLocaleDateString(),
+            // Invoice due date
+            "due-date": due_date.toLocaleDateString()
+        },
 
-    // Here you can customize your invoice dimensions, currency, tax notation, and number formatting based on your locale
-    settings: {
-      currency: `${order.currency}`, // See documentation 'Locales and Currency' for more info. Leave empty for no currency.
-      "tax-notation": "vat",
-      /*
+        // Now let's add some products! Calculations will be done automatically for you.
+        "products": [
+            {
+                "quantity": order.quantity,
+                "description": order.description,
+                "tax-rate": parseInt(order.tax_rate),
+                "price": 1
+            }
+        ],
+
+        // We will use bottomNotice to add a message of choice to the bottom of our invoice
+
+        "bottom-notice": `Kindly pay your invoice within ${order.due_days} days.`,
+ 
+        // Here you can customize your invoice dimensions, currency, tax notation, and number formatting based on your locale
+        "settings": {
+            "currency": `${order.currency}`, // See documentation 'Locales and Currency' for more info. Leave empty for no currency.
+            "tax-notation": "vat"
+            /*
              "locale": "nl-NL", // Defaults to en-US, used for number formatting (See documentation 'Locales and Currency')
              "tax-notation": "gst", // Defaults to 'vat'
     
@@ -218,14 +228,17 @@ const generateInvoice = async (order) => {
          */
   };
 
-  easyinvoice.createInvoice(data, function (result) {
-    //The response will contain a base64 encoded PDF file
-    var pdf = result.pdf;
+    // easyinvoice.createInvoice(data, function (result) {
+    //     //The response will contain a base64 encoded PDF file
+    //     var pdf = result.pdf;
 
-    //Now let's save our invoice to our local filesystem
-    fs.writeFileSync("invoice.pdf", pdf, "base64");
-  });
-};
+    //     //Now let's save our invoice to our local filesystem
+    //     fs.writeFileSync("invoice.pdf", pdf, 'base64');
+    // });
+    console.log("verificare data: ", data)
+    const result = await easyinvoice.createInvoice(data);
+    fs.writeFileSync("invoice.pdf", result.pdf, 'base64');
+}
 
 module.exports = {
   connectToDb,
