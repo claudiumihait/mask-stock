@@ -3,9 +3,9 @@ import Col from "react-bootstrap/Col";
 import Form from "react-bootstrap/Form";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
-import { useNavigate } from "react-router-dom";
 import baseLogo from "../../src/images/register_logo.png";
 import succesfulLogo from "../../src/images/succesful.gif";
+import Alert from "react-bootstrap/Alert";
 
 const AddNew = () => {
   const [formData, setFormData] = useState({
@@ -52,7 +52,7 @@ const AddNew = () => {
     setFields(whoseFields.filter((_, index) => index !== i));
     const newFormData = { ...formData };
     newFormData[property].splice(i, 1);
-    setFormData(newFormData);
+    updateForm(newFormData);
   };
 
   const handleEmails = (whoseFields, e, i, property, setFields) => {
@@ -60,7 +60,7 @@ const AddNew = () => {
     property === "emails"
       ? (newFormData[property][i] = e.target.value)
       : (newFormData[property][i] = { email: e.target.value, admin: false });
-    setFormData(newFormData);
+    updateForm(newFormData);
     const newEmailFields = [...whoseFields];
     newEmailFields[i].value = e.target.value;
     setFields(newEmailFields);
@@ -72,19 +72,57 @@ const AddNew = () => {
       ...newFormData.users[i],
       admin: !newFormData.users[i].admin,
     };
-    setFormData(newFormData);
+    updateForm(newFormData);
   };
+
+  const updateForm = (value) =>
+    setFormData((prev) => {
+      return { ...prev, ...value };
+    });
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const newHospital = { ...formData };
     fetch("http://localhost:9000/api/hospitals", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
+      body: JSON.stringify(newHospital),
     })
       .then((res) => res.json())
-      .then((message) => setSuccessMessage(message))
-      .catch((e) => console.log(e));
+      .then((message) => {
+        setSuccessMessage(message);
+        setFormData({
+          name: "",
+          users: [{ email: "", admin: false }],
+          address: {
+            country_code: "",
+            post_code: "",
+            city: "",
+            address: "",
+          },
+          emails: [],
+          taxcode: "",
+          iban: "",
+          swift: "",
+          account_number: "",
+          phone: "",
+          general_ledger_number: "999",
+          tax_type: "",
+          custom_billing_settings: {
+            payment_method: "aruhitel",
+            document_form: "electronic",
+            due_days: 0,
+            document_currency: "AED",
+            template_language_code: "de",
+            discount: {
+              type: "percent",
+              value: 0,
+            },
+          },
+          group_member_tax_number: "999",
+        });
+      })
+      .catch((e) => window.alert(e));
   };
 
   const isFormValid = () => {
@@ -121,7 +159,7 @@ const AddNew = () => {
 
   useEffect(() => {
     setValidForm(isFormValid());
-    console.log(formData.users);
+    console.log(formData);
   }, [formData]);
 
   return (
@@ -158,9 +196,10 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.name}
                 placeholder="Enter hospital name"
                 onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
+                  updateForm({ ...formData, name: e.target.value })
                 }
               />
               <Form.Text>Hospital name</Form.Text>
@@ -170,13 +209,13 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.address.country_code}
                 placeholder="Enter country code"
                 onChange={(e) =>
-                  setFormData({
-                    ...formData,
+                  updateForm({
                     address: {
                       ...formData.address,
-                      country_code: e.target.value.toUpperCase(),
+                      country_code: e.target.value,
                     },
                   })
                 }
@@ -185,9 +224,10 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.address.post_code}
                 placeholder="Enter postal code"
                 onChange={(e) =>
-                  setFormData({
+                  updateForm({
                     ...formData,
                     address: {
                       ...formData.address,
@@ -201,8 +241,9 @@ const AddNew = () => {
                 required
                 type="text"
                 placeholder="Enter city"
+                value={formData.address.city}
                 onChange={(e) =>
-                  setFormData({
+                  updateForm({
                     ...formData,
                     address: {
                       ...formData.address,
@@ -215,9 +256,10 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.address.address}
                 placeholder="Enter address"
                 onChange={(e) =>
-                  setFormData({
+                  updateForm({
                     ...formData,
                     address: {
                       ...formData.address,
@@ -230,9 +272,10 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.phone}
                 placeholder="Enter phone number"
                 onChange={(e) =>
-                  setFormData({
+                  updateForm({
                     ...formData,
                     phone: e.target.value,
                   })
@@ -301,9 +344,10 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.taxcode}
                 placeholder="Enter tax code"
                 onChange={(e) =>
-                  setFormData({
+                  updateForm({
                     ...formData,
                     taxcode: e.target.value,
                   })
@@ -313,9 +357,10 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.iban}
                 placeholder="Enter IBAN"
                 onChange={(e) =>
-                  setFormData({
+                  updateForm({
                     ...formData,
                     iban: e.target.value,
                   })
@@ -325,9 +370,10 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.swift}
                 placeholder="Enter SWIFT Code"
                 onChange={(e) =>
-                  setFormData({
+                  updateForm({
                     ...formData,
                     swift: e.target.value,
                   })
@@ -337,9 +383,10 @@ const AddNew = () => {
               <Form.Control
                 required
                 type="text"
+                value={formData.account_number}
                 placeholder="Enter account number"
                 onChange={(e) =>
-                  setFormData({
+                  updateForm({
                     ...formData,
                     account_number: e.target.value,
                   })
@@ -427,7 +474,18 @@ const AddNew = () => {
                 marginTop: "1rem",
               }}
             >
-              {successMessage ? successMessage : ""}
+              {successMessage.includes("Success") ? (
+                <Alert key="succes" variant="success">
+                  {successMessage} Click{" "}
+                  <Alert.Link href="/order">here</Alert.Link> to place an order
+                </Alert>
+              ) : successMessage.includes("wrong") ? (
+                <Alert key="danger" variant="danger">
+                  {successMessage}
+                </Alert>
+              ) : (
+                ""
+              )}
             </Form.Text>
           </Form>
         </Card.Body>
