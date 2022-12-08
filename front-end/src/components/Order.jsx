@@ -103,7 +103,7 @@ const Order = () => {
             </Row>
             <Row className="d-flex justify-content-center">
                 <Col sm={6} md={6} lg={6}>
-                    <Card bg="dark">
+                    <Card bg="dark" text="white">
                         <Card.Img variant="top" src="https://static.vecteezy.com/system/resources/previews/004/493/181/original/hospital-building-for-healthcare-background-illustration-with-ambulance-car-doctor-patient-nurses-and-medical-clinic-exterior-free-vector.jpg" />
                         <Card.Body>
                             <Card.Title>Place orders</Card.Title>
