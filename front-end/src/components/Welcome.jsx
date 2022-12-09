@@ -44,18 +44,19 @@ const Welcome = (props) => {
                     <Col xs={12} md={{ span: 8, offset: 2 }} lg={{ span: 4, offset: 1 }} style={{ padding: "1rem" }}>
                         <Card style={{backgroundColor:"transparent", border:"0"}}>
                             <Card.Body >
-                                <h5 className="text-center"><strong>{`Welcome, ${props.name}!`}</strong></h5>
-                                <h5 className="text-center"><strong>These are your hospitals data</strong></h5>
-                                <Table striped bordered hover variant="dark" responsive className="w-100 my-5">
-                                    <thead>
-                                        <tr>
-                                            {Object.keys(props.tableData[0]).slice(0, 2).map((item, index) => <th key={index}>{item}</th>)}
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {props.tableData.map((object, index) => tableData(object, index))}
-                                    </tbody>
-                                </Table>
+                                {props.tableData.length && <>
+                                    <h5 className="text-center"><strong>{`Welcome, ${props.name}!`}</strong></h5>
+                                    <h5 className="text-center"><strong>These are your hospitals data</strong></h5>
+                                    <Table striped bordered hover variant="dark" responsive className="w-100 my-5">
+                                        <thead>
+                                            <tr>
+                                                {Object.keys(props.tableData[0]).slice(0, 2).map((item, index) => <th key={index}>{item}</th>)}
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {props.tableData.map((object, index) => tableData(object, index))}
+                                        </tbody>
+                                    </Table></>}
                             </Card.Body>
                         </Card>
                     </Col>
