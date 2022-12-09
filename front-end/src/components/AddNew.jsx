@@ -406,7 +406,7 @@ const AddNew = () => {
                       <Form.Control
                         className="mx-1 my-1"
                         required
-                        type="text"
+                        type="email"
                         value={formData.users[i]?.email || ""}
                         placeholder="Enter user email"
                         onChange={(e) =>

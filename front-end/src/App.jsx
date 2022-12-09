@@ -87,7 +87,7 @@ function App() {
             <Route path="/login" element={<Login />} />
             <Route path="/order" element={<Order userName={logged}/>} />
             <Route path="/add-new" element={<AddNew />} />
-            <Route path="/welcome" element={tableData && <Welcome tableData={tableData} name={logged} />} />
+            <Route path="/welcome" element={<Welcome tableData={tableData} name={logged} />} />
           </Routes>
         </Col>
       </Row>
