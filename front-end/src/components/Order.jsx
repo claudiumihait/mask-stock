@@ -38,7 +38,6 @@ const Order = () => {
             body: JSON.stringify({userName})
         })
         let raspuns = await response.json()
-        console.log(raspuns)
         if(response.ok){
             setJobs(raspuns)
         }
@@ -84,7 +83,7 @@ const Order = () => {
             })
             
             if(response.ok){
-                    window.location = "http://localhost:9000/downloadInvoice"
+                window.location = "http://localhost:9000/downloadInvoice"
             }
         }else{
             setError("All field must be filled!")
@@ -92,6 +91,12 @@ const Order = () => {
                 setError("")
             },3000)
         }
+        setOrder({
+            hospital: "",
+            product: "",
+            quantity: 0
+        })
+        getStock()
     }
 
     return ( 
@@ -113,29 +118,28 @@ const Order = () => {
                             <Form className="d-flex justify-content-center flex-column">
                                 <InputGroup className="mb-3">
                                     <InputGroup.Text id="basic-addon1">Hospital: </InputGroup.Text>
-                                    <Form.Select aria-label="Default select example" onChange={(e)=>setOrder({...order, hospital:e.target.value})}>
+                                    <Form.Select aria-label="Default select example" value={order.hospital} onChange={(e)=>setOrder({...order, hospital:e.target.value})}>
                                         <option>Select a hospital</option>
                                         {jobs&&
-                                            jobs.map((hospital,i)=><option key={i} value={`${hospital.name}`}>{`${hospital.name}`}</option>)
+                                            jobs.map((hospital,i)=><option key={i}>{`${hospital.name}`}</option>)
                                         }
                                     </Form.Select>
                                 </InputGroup>
                                 <InputGroup className="mb-3">
                                     <InputGroup.Text id="basic-addon1">Product: </InputGroup.Text>
-                                    <Form.Select aria-label="Default select example" onChange={(e)=>setOrder({...order, product: e.target.value})}>
+                                    <Form.Select aria-label="Default select example" value={order.product} onChange={(e)=>setOrder({...order, product: e.target.value})}>
                                         <option>Select product...</option>
                                         {stocks&&
-                                            stocks.map((prod,i)=><option key={i} value={prod.name}>{`${prod.name}`}</option>)}
+                                            stocks.map((prod,i)=><option key={i} >{`${prod.name}`}</option>)}
                                     </Form.Select>
                                 </InputGroup>
 
                                 <InputGroup className="mb-3">
                                     <InputGroup.Text id="basic-addon1">Quantity:</InputGroup.Text>
-                                    <Form.Control type="number" placeholder="123" onChange={(e)=>setOrder({...order, quantity:e.target.value})}/>
+                                    <Form.Control value ={order.quantity} type="number" placeholder="123" onChange={(e)=>setOrder({...order, quantity:e.target.value})}/>
                                 </InputGroup>
-                                
-                                {error&&<h2 id="err" className="text-center">{error}</h2>}
 
+                                {error&&<h2 id="err" className="text-center">{error}</h2>}
                                 <Button variant="primary" type="submit" onClick={(e)=>sendOrder(e)}>
                                     Place order
                                 </Button>
