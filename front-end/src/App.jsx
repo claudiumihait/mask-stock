@@ -71,6 +71,10 @@ function App() {
     }
   }, [logged])
 
+  useEffect(() => {
+    console.log(logged)
+  }, [logged])
+
   return (
     <Container fluid>
       <Header />

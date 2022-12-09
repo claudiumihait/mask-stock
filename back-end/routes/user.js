@@ -104,7 +104,7 @@ router.post("/user-data", async (request, response, next) => {
     } catch (error) {
         response.status(500).json({ "error": error });
     };
-
+});
 
 router.get("/auth/:id/:token", async (req, res, next) => {
   try {
