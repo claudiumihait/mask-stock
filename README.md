@@ -1,75 +1,111 @@
-# Mask Stock
 
-## Story
 
-Congratulations!
-Your developer business has a new client, one of the largest environmentally friendly reusable FFP2/KN95 mask supplier in Europe.
-Their company wants to create a new B2B website for European hospitals to make the order and delivery easier.
-Their stock is refilled on the first day of every month with 10.000 new masks.
-Your new client contracted with 10 hospitals and every hospitals have a dedicated person who is responsible to place the orders.
-List of the hospitals:
-- Pécsi Irgalmasrendi Kórház, Pécs (Hungary)
-- Miskolci Semmelweis Ignác Egészségügyi Központ és Egyetemi Oktatókórház, Miskolc (Hungary)
-- Szent Pantaleon Kórház Kht., Dunaújváros (Hungary)
-- Markhot Ferenc Oktatókórház és Rendelőintézet, Eger (Hungary)
-- Fővárosi Önkormányzat Heim Pál Gyermekkórház, Budapest (Hungary)
-- The Helios Hospital Berlin-Buch, Berlin (Germany)
-- The University Hospital Duesseldorf, Duesseldorf (Germany)
-- The University Hospital of Ludwig Maximilian University of Munich , Munich (Germany)
-- Rigas Austrumu Kliniskas Universitates, Riga (Latvia)
-- Karolinska University Hospital, Stockholm (Swened)
+# Mask Stock #
 
-You have to create a web application where the hospitals' employee can login to their account and order new amount of masks.
-The hospitals paying for the order with bank transfer 15 days due date.
-The application should contain the following features: Automatically updated stock, order form, login and registration page, order history.
-The application have to care about the invoicing as well. Your client asked you to solve it with Billingo's API so you have to check the API's documentation for the information needed for generating invoices with Billingo API (you order form have to include all the necessary details).
-Don't forget that your Client's company is Hungarian so the Hungarian hospitals have to pay Hungarian TAX (VAT / ÁFA - 27%) but the hospitals form the other countries don't have to pay (if they have/set EU VAT Number).
 
-## What are you going to learn?
+### Description ###
 
-- recap React JS, Node JS, Express JS
-- use MongooseJS
-- store data with mongoDB
-- connect to an API on the server side (fetch GET/POST)
+_Note: This application was created as a learning project to practice JavaScript development skills, specifically utilizing the MERN (MongoDB, Express.js, React, Node.js) stack. It is not intended for actual commercial use._
 
-## Tasks
+The Mask-Stock is a web application designed to streamline the process of ordering medical equipment for hospital employees. It provides a user-friendly interface where employees can log in to their accounts, place orders for medical equipment. Registered users also have the ability to add new hospital data, including information about hospitals and define users with admin privileges who are authorized to place orders specifically for their respective hospitals. This feature allows for efficient management and customization of user roles within the application, ensuring that only authorized individuals can initiate mask orders on behalf of their hospitals
 
-1. Create a noSQL database which able to store all the required data: Legal data of the hospitals. (Check Billingo API's documentation.) Accounts for the hospitals employees. (The users.) Orders and their details.
-    - The database contains all the 10 hospitals
-    - Each hospital's data contains all the legal data for issuing an invoice for the hospital
-    - Every hospital have at least one user account
-    - User accounts connected to one or two hospitals
-    - An invoice is generated for every order
-    - Every order is saved into the database
-    - The amount of currently available masks is stored in the database
-    - Every order affects the available amount of the masks
 
-2. Connect to the Billingo API from the backend side, post all the orders to the API to generate invoices. Handling TAX / VAT is important!
-    - Every order generates an invoice in Billingo
-    - The tax is different for Hungarian hospitals than other EU hospitals
+### Installation ###
 
-3. Create a web based order form where the employees (users) can place orders on behalf of their hospitals. Secure the order form so only (the allowed) users could access to it. A users could see the orders of their hospitals only.
-    - The order form available only after login or registration
-    - The users are able to add new hospitals
-    - The users can see the hospitals data connected to their account
-    - The users can select from their hospitals for issuing the invoice
+To set up the Hospital Mask Ordering App, please follow the steps below:
 
-## General requirements
+1. Navigate to the "back-end" folder in the project directory.
 
-None
+```cd back-end```
+2. Install the required dependencies by running the following command:
 
-## Hints
+```npm install```
 
-- Before you start the project, check the documentation of the Billingo API especially the required data for partner and invoice creation (build the hopsital database on those data)
-- Pay special attention to the format of all API values (string, number, date formats)
-- You can solve the registration and login with Passport.js
+3. Start the backend server by running the following command:
 
-## Background materials
+```npm start```
 
-- <i class="far fa-exclamation"></i> [Billingo API documentation](https://app.swaggerhub.com/apis/Billingo/Billingo)
-- <i class="far fa-exclamation"></i> [Passport JS](http://www.passportjs.org)
-- <i class="far fa-book-open"></i> [MongoDB - NoSQL database](https://www.mongodb.com/)
-- <i class="far fa-book-open"></i> [MongooseJS - MongoDB connector](https://mongoosejs.com/)
-- <i class="far fa-book-open"></i> [Simple CRUD app with Node, Express, and MongoDB](https://zellwk.com/blog/crud-express-mongodb)
-- <i class="far fa-book-open"></i> [Set up an Express.Js App With Passport.Js and Mongodb for Password Authentication](https://medium.com/swlh/set-up-an-express-js-app-with-passport-js-and-mongodb-for-password-authentication-6ea05d95335c)
-- <i class="far fa-book-open"></i> [Authenticate Users With Node ExpressJS and Passport.js](https://heynode.com/tutorial/authenticate-users-node-expressjs-and-passportjs)
+This command is equivalent to running `nodemon server.js` and will start the backend server for the app.
+
+4. Open a new terminal window and navigate to the "front-end" folder in the project directory.
+
+```cd front-end/```
+
+5. Install the necessary dependencies for the frontend by running the following command:
+
+```npm install```
+
+6. Start the frontend development server using the following command:
+
+```npm run dev```
+
+This command uses **Vite** as the run engine and will launch the frontend development server for the app.
+
+Once the backend and frontend servers are running, you can access the application by opening your web browser and visiting the appropriate URL or localhost address.
+
+**_Note:_** _Make sure to start the backend server first before launching the frontend server to ensure proper communication between the two components._
+
+
+### Usage & Features ###
+
+Follow these instructions to effectively use the Mask Stock App:
+
+1. Launch the app by accessing the provided localhost URL in your web browser.
+2. Upon launching the app, you will be prompted with a login form. If you are not logged in, you can click on the register button or navigate to the registration tab at the top of the page.
+3. If registering as a new user, fill in the required credentials and proceed with the registration process. Note that you will need to verify your email address before being able to log in.
+4. After logging in, you will be directed to the home page, where you can view the hospitals you are registered to and your corresponding rights.
+5. To place an order, navigate to the "Order" tab. Here, you can select the hospital for which the order is being placed, choose the desired item for the order, and specify the quantity. Clicking the "Place Order" button will generate an invoice and save the order in the database.
+6. If you are logged in, you can add a new hospital by going to the "Add Hospital" tab. A complete form will be rendered, allowing you to provide the required information. You can also add user email addresses related to the added hospital and set roles (admin/non-admin) from this form.
+7. The app includes a logout option, which allows you to securely log out of your account.
+8. Once logged in, you will see your username displayed at the top right of the page, indicating the user you are currently logged in as.
+
+
+### Screenshots ###
+
+
+#### Registration Page ####
+
+![Login Form](https://i.imgur.com/u0t8AY6.png)
+
+#### Login Page ####
+
+![Register Form](https://i.imgur.com/DnaOYbh.png)
+
+#### Home Page ####
+
+![Home Page](https://i.imgur.com/xBGRnpe.png)
+
+#### Placing an order ####
+
+![Placed order](https://i.imgur.com/WoIANhv.png)
+
+#### Generated Invoice ####
+
+![Invoice PDF](https://i.imgur.com/WIBTBuc.png)
+
+#### Adding New Hospital ####
+
+![Add New Hospital Form](https://i.imgur.com/a5rWoWQ.png)
+
+
+### Technologies ###
+
+Following technologies were used in developing this app:
+
+1. **JavaScript:** The core programming language used to develop the app, enabling interactive and dynamic functionalities.
+2. **Node.js:** The app is developed using Node.js, an open-source JavaScript runtime environment, which allows running JavaScript on the server-side.
+3. **HTML:** The standard markup language for creating the structure and content of web pages.
+3. **CSS:** Cascading Style Sheets are utilized to enhance the visual presentation and styling of the application, ensuring an appealing and user-friendly interface.
+4. **Express:** The app is built on the Express framework, a popular web application framework for Node.js. Express simplifies the development of server-side functionality, routing, and handling of requests and responses, enabling efficient and scalable web applications.
+5. **MongoDB:** The app utilizes MongoDB, a NoSQL database, to store and manage the app's data, including user information, orders, and hospital details. MongoDB's flexibility and scalability make it well-suited for handling complex data structures and high volumes of data.
+6. **Nodemailer:** Library used for sending emails in the app. It provides a simple and straightforward way to send emails, enabling functionalities such as email verification and notifications.
+7. **Passport:** A popular authentication middleware for Node.js applications. It offers various strategies, including Passport-JWT (JSON Web Token) and Passport-Local, which were utilized in the app for implementing authentication and authorization functionalities. Passport-JWT allows secure handling of JSON Web Tokens, while Passport-Local provides local authentication using username and password.
+
+### License
+
+This project is licensed under the MIT License. See the LICENSE file for details.
+
+
+### Contact ### 
+
+Feel free to contact me at: [claudium.tudor@gmail.com](claudium.tudor@gmail.com)
