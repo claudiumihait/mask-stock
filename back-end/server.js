@@ -16,7 +16,7 @@ const app = express();
 
 //use cors
 app.use(cors({
-  origin: ["http://127.0.0.1:5173"],
+  origin: ["http://localhost:5173"],
   credentials: true
 }));
 
@@ -116,4 +116,4 @@ app.post("/jobs", async(req,res)=>{
 })
 
 //setting server port
-app.listen(PORT, (_) => console.log(`http://127.0.0.1:${PORT}`));
+app.listen(PORT, (_) => console.log(`http://localhost:${PORT}`));

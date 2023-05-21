@@ -23,7 +23,7 @@ const checkUsername = async (name) => {
     return "Username too short.";
   } else {
     let usernames = await userSchema.find({}, { _id: 0, username: 1 });
-    if (usernames.map((obj) => obj.username).includes(name)) {
+    if (usernames.map((obj) => obj.username.toLowerCase()).includes(name.toLowerCase())) {
       return "Username already taken.";
     } else {
       return "Valid username.";
@@ -32,21 +32,21 @@ const checkUsername = async (name) => {
 };
 
 const checkEmail = async (value) => {
-  let isValidHospitalMail = false;
+  let isValidEmail = false;
   const hospitalsData = await hospitalSchema.find({}, { _id: 0, users: 1 });
   const usersOfHospitals = hospitalsData.map((obj) => obj.users);
   usersOfHospitals.forEach((item) => {
     item.forEach((obj) => {
       if (obj.email == value) {
-        isValidHospitalMail = true;
+        isValidEmail = true;
         return;
       }
     });
   });
-  if (!value.match(/(.+)@(.+){2,}/i)) {
+  if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/i.test(`${value}`)) {
     return "Invalid email.";
-  } else if (!isValidHospitalMail) {
-    return "Not a hospital email.";
+  } else if (!isValidEmail) {
+    return "Not a valid email.";
   } else {
     let emails = await userSchema.find({}, { _id: 0, email: 1 });
     if (emails.map((obj) => obj.email).includes(value)) {
@@ -136,7 +136,7 @@ const getHospitalDataByUserName = async (username) => {
 const generateInvoice = async(order) => {
     const today = new Date();
     let due_date = new Date();
-    due_date.setDate(due_date.getDate() + parseInt(order.due_days))
+    due_date.setDate(due_date.getDate() + parseInt("7"))
 
     let data = {
         "client": {
@@ -186,7 +186,7 @@ const generateInvoice = async(order) => {
 
         // We will use bottomNotice to add a message of choice to the bottom of our invoice
 
-        "bottom-notice": `Kindly pay your invoice within ${order.due_days} days.`,
+        "bottom-notice": `Kindly pay your invoice within ${order.due_days} working days.`,
  
         // Here you can customize your invoice dimensions, currency, tax notation, and number formatting based on your locale
         "settings": {

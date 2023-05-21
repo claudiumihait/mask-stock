@@ -21,7 +21,7 @@ const Register = () => {
   const [messages, setMessagesState] = useState({
     password: "Choose a complex password.",
     email: " We'll never share your email with anyone else.",
-    username: "Prefered username.",
+    username: "Preferred username.",
   });
   const [successCondition, setSuccessCondition] = useState(false);
 
