@@ -93,7 +93,8 @@ Follow these instructions to effectively use the Mask Stock App:
 Following technologies were used in developing this app:
 
 1. **JavaScript:** The core programming language used to develop the app, enabling interactive and dynamic functionalities.
-2. **Node.js:** The app is developed using Node.js, an open-source JavaScript runtime environment, which allows running JavaScript on the server-side.
+2. **React:** React is a popular JavaScript library for building user interfaces. It allows for the creation of reusable UI components and provides a declarative approach to building interactive UIs. React was used in the app to create dynamic and efficient user interfaces.
+3. **Node.js:** The app is developed using Node.js, an open-source JavaScript runtime environment, which allows running JavaScript on the server-side.
 3. **HTML:** The standard markup language for creating the structure and content of web pages.
 3. **CSS:** Cascading Style Sheets are utilized to enhance the visual presentation and styling of the application, ensuring an appealing and user-friendly interface.
 4. **Express:** The app is built on the Express framework, a popular web application framework for Node.js. Express simplifies the development of server-side functionality, routing, and handling of requests and responses, enabling efficient and scalable web applications.
